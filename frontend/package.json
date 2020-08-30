@@ -39,6 +39,7 @@
     ]
   },
   "devDependencies": {
-    "@types/socket.io-client": "^1.4.33"
+    "@types/socket.io-client": "^1.4.33",
+    "prettier": "2.1.1"
   }
 }

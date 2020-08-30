@@ -18,5 +18,8 @@
     "protoo-client": "^4.0.4",
     "protoo-server": "^4.0.4",
     "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "prettier": "2.1.1"
   }
 }
