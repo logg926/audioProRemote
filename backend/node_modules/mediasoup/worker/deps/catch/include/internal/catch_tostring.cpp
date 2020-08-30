@@ -38,11 +38,13 @@ namespace Detail {
             enum Arch { Big, Little };
 
             static Arch which() {
-                int one = 1;
-                // If the lowest byte we read is non-zero, we can assume
-                // that little endian format is used.
-                auto value = *reinterpret_cast<char*>(&one);
-                return value ? Little : Big;
+                union _{
+                    int asInt;
+                    char asChar[sizeof (int)];
+                } u;
+
+                u.asInt = 1;
+                return ( u.asChar[sizeof(int)-1] == 1 ) ? Big : Little;
             }
         };
     }
@@ -168,12 +170,6 @@ std::string StringMaker<wchar_t *>::convert(wchar_t * str) {
 }
 #endif
 
-#if defined(CATCH_CONFIG_CPP17_BYTE)
-#include <cstddef>
-std::string StringMaker<std::byte>::convert(std::byte value) {
-    return ::Catch::Detail::stringify(std::to_integer<unsigned long long>(value));
-}
-#endif // defined(CATCH_CONFIG_CPP17_BYTE)
 
 std::string StringMaker<int>::convert(int value) {
     return ::Catch::Detail::stringify(static_cast<long long>(value));
@@ -238,16 +234,11 @@ std::string StringMaker<std::nullptr_t>::convert(std::nullptr_t) {
     return "nullptr";
 }
 
-int StringMaker<float>::precision = 5;
-
 std::string StringMaker<float>::convert(float value) {
-    return fpToString(value, precision) + 'f';
+    return fpToString(value, 5) + 'f';
 }
-
-int StringMaker<double>::precision = 10;
-
 std::string StringMaker<double>::convert(double value) {
-    return fpToString(value, precision);
+    return fpToString(value, 10);
 }
 
 std::string ratio_string<std::atto>::symbol() { return "a"; }

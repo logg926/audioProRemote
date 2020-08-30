@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2013-2016 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
-#include <stdlib.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
@@ -28,7 +27,7 @@ int main(int argc, char *argv[])
     SSL_CONF_CTX *cctx;
     char buf[512];
     BIO *in = NULL;
-    int ret = EXIT_FAILURE, i;
+    int ret = 1, i;
     char **args = argv + 1;
     int nargs = argc - 1;
 
@@ -135,10 +134,12 @@ int main(int argc, char *argv[])
         fflush(stdout);
     }
 
-    ret = EXIT_SUCCESS;
+    ret = 0;
  err:
-    if (ret != EXIT_SUCCESS)
+    if (ret) {
         ERR_print_errors_fp(stderr);
+    }
     BIO_free(in);
-    return ret;
+    exit(ret);
+    return (!ret);
 }

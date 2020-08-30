@@ -14,6 +14,7 @@
 #include <openssl/evp.h>
 #include <openssl/ui.h>
 
+#ifndef OPENSSL_NO_UI
 /* should be init to zeros. */
 static char prompt_string[80];
 
@@ -30,9 +31,9 @@ void EVP_set_pw_prompt(const char *prompt)
 char *EVP_get_pw_prompt(void)
 {
     if (prompt_string[0] == '\0')
-        return NULL;
+        return (NULL);
     else
-        return prompt_string;
+        return (prompt_string);
 }
 
 /*
@@ -70,6 +71,7 @@ int EVP_read_pw_string_min(char *buf, int min, int len, const char *prompt,
     UI_free(ui);
     return ret;
 }
+#endif /* OPENSSL_NO_UI */
 
 int EVP_BytesToKey(const EVP_CIPHER *type, const EVP_MD *md,
                    const unsigned char *salt, const unsigned char *data,
@@ -87,7 +89,7 @@ int EVP_BytesToKey(const EVP_CIPHER *type, const EVP_MD *md,
     OPENSSL_assert(niv <= EVP_MAX_IV_LENGTH);
 
     if (data == NULL)
-        return nkey;
+        return (nkey);
 
     c = EVP_MD_CTX_new();
     if (c == NULL)

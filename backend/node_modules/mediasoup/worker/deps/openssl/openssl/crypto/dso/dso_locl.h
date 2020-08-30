@@ -11,7 +11,6 @@
 #include "internal/cryptlib.h"
 #include "internal/dso.h"
 #include "internal/dso_conf.h"
-#include "internal/refcount.h"
 
 /**********************************************************************/
 /* The low-level handle type used to refer to a loaded shared library */
@@ -25,7 +24,7 @@ struct dso_st {
      * "Handles" and such go in a STACK.
      */
     STACK_OF(void) *meth_data;
-    CRYPTO_REF_COUNT references;
+    int references;
     int flags;
     /*
      * For use by applications etc ... use this for your bits'n'pieces, don't

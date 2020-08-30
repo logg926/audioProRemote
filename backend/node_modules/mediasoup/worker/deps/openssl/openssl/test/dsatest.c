@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2017 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2016 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -13,15 +13,23 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "../e_os.h"
+
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
 #include <openssl/bn.h>
-#include <openssl/dsa.h>
 
-#include "testutil.h"
-#include "internal/nelem.h"
+#ifdef OPENSSL_NO_DSA
+int main(int argc, char *argv[])
+{
+    printf("No DSA support\n");
+    return (0);
+}
+#else
+# include <openssl/dsa.h>
 
-#ifndef OPENSSL_NO_DSA
 static int dsa_cb(int p, int n, BN_GENCB *arg);
 
 /*
@@ -63,7 +71,12 @@ static unsigned char out_g[] = {
 
 static const unsigned char str1[] = "12345678901234567890";
 
-static int dsa_test(void)
+static const char rnd_seed[] =
+    "string to make the random number generator think it has entropy";
+
+static BIO *bio_err = NULL;
+
+int main(int argc, char **argv)
 {
     BN_GENCB *cb;
     DSA *dsa = NULL;
@@ -74,68 +87,110 @@ static int dsa_test(void)
     unsigned int siglen;
     const BIGNUM *p = NULL, *q = NULL, *g = NULL;
 
-    if (!TEST_ptr(cb = BN_GENCB_new()))
+    if (bio_err == NULL)
+        bio_err = BIO_new_fp(stderr, BIO_NOCLOSE | BIO_FP_TEXT);
+
+    CRYPTO_set_mem_debug(1);
+    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+
+    RAND_seed(rnd_seed, sizeof(rnd_seed));
+
+    BIO_printf(bio_err, "test generation of DSA parameters\n");
+
+    cb = BN_GENCB_new();
+    if (!cb)
         goto end;
 
-    BN_GENCB_set(cb, dsa_cb, NULL);
-    if (!TEST_ptr(dsa = DSA_new())
-        || !TEST_true(DSA_generate_parameters_ex(dsa, 512, seed, 20,
-                                                &counter, &h, cb)))
+    BN_GENCB_set(cb, dsa_cb, bio_err);
+    if (((dsa = DSA_new()) == NULL) || !DSA_generate_parameters_ex(dsa, 512,
+                                                                   seed, 20,
+                                                                   &counter,
+                                                                   &h, cb))
         goto end;
 
-    if (!TEST_int_eq(counter, 105))
+    BIO_printf(bio_err, "seed\n");
+    for (i = 0; i < 20; i += 4) {
+        BIO_printf(bio_err, "%02X%02X%02X%02X ",
+                   seed[i], seed[i + 1], seed[i + 2], seed[i + 3]);
+    }
+    BIO_printf(bio_err, "\ncounter=%d h=%ld\n", counter, h);
+
+    DSA_print(bio_err, dsa, 0);
+    if (counter != 105) {
+        BIO_printf(bio_err, "counter should be 105\n");
         goto end;
-    if (!TEST_int_eq(h, 2))
+    }
+    if (h != 2) {
+        BIO_printf(bio_err, "h should be 2\n");
         goto end;
+    }
 
     DSA_get0_pqg(dsa, &p, &q, &g);
     i = BN_bn2bin(q, buf);
     j = sizeof(out_q);
-    if (!TEST_int_eq(i, j) || !TEST_mem_eq(buf, i, out_q, i))
+    if ((i != j) || (memcmp(buf, out_q, i) != 0)) {
+        BIO_printf(bio_err, "q value is wrong\n");
         goto end;
+    }
 
     i = BN_bn2bin(p, buf);
     j = sizeof(out_p);
-    if (!TEST_int_eq(i, j) || !TEST_mem_eq(buf, i, out_p, i))
+    if ((i != j) || (memcmp(buf, out_p, i) != 0)) {
+        BIO_printf(bio_err, "p value is wrong\n");
         goto end;
+    }
 
     i = BN_bn2bin(g, buf);
     j = sizeof(out_g);
-    if (!TEST_int_eq(i, j) || !TEST_mem_eq(buf, i, out_g, i))
+    if ((i != j) || (memcmp(buf, out_g, i) != 0)) {
+        BIO_printf(bio_err, "g value is wrong\n");
         goto end;
+    }
 
     DSA_generate_key(dsa);
     DSA_sign(0, str1, 20, sig, &siglen, dsa);
-    if (TEST_true(DSA_verify(0, str1, 20, sig, siglen, dsa)))
+    if (DSA_verify(0, str1, 20, sig, siglen, dsa) == 1)
         ret = 1;
 
  end:
+    if (!ret)
+        ERR_print_errors(bio_err);
     DSA_free(dsa);
     BN_GENCB_free(cb);
-    return ret;
+
+#ifndef OPENSSL_NO_CRYPTO_MDEBUG
+    if (CRYPTO_mem_leaks(bio_err) <= 0)
+        ret = 0;
+#endif
+    BIO_free(bio_err);
+    bio_err = NULL;
+    EXIT(!ret);
 }
 
 static int dsa_cb(int p, int n, BN_GENCB *arg)
 {
+    char c = '*';
     static int ok = 0, num = 0;
 
-    if (p == 0)
+    if (p == 0) {
+        c = '.';
         num++;
-    if (p == 2)
+    };
+    if (p == 1)
+        c = '+';
+    if (p == 2) {
+        c = '*';
         ok++;
+    }
+    if (p == 3)
+        c = '\n';
+    BIO_write(BN_GENCB_get_arg(arg), &c, 1);
+    (void)BIO_flush(BN_GENCB_get_arg(arg));
 
     if (!ok && (p == 0) && (num > 1)) {
-        TEST_error("dsa_cb error");
+        BIO_printf(BN_GENCB_get_arg(arg), "error in dsatest\n");
         return 0;
     }
     return 1;
 }
-#endif /* OPENSSL_NO_DSA */
-
-int setup_tests(void)
-{
-#ifndef OPENSSL_NO_DSA
-    ADD_TEST(dsa_test);
 #endif
-    return 1;
-}

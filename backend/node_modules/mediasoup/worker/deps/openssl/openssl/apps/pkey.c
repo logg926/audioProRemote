@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "apps.h"
-#include "progs.h"
 #include <openssl/pem.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
@@ -19,10 +18,10 @@ typedef enum OPTION_choice {
     OPT_ERR = -1, OPT_EOF = 0, OPT_HELP,
     OPT_INFORM, OPT_OUTFORM, OPT_PASSIN, OPT_PASSOUT, OPT_ENGINE,
     OPT_IN, OPT_OUT, OPT_PUBIN, OPT_PUBOUT, OPT_TEXT_PUB,
-    OPT_TEXT, OPT_NOOUT, OPT_MD, OPT_TRADITIONAL, OPT_CHECK, OPT_PUB_CHECK
+    OPT_TEXT, OPT_NOOUT, OPT_MD, OPT_TRADITIONAL
 } OPTION_CHOICE;
 
-const OPTIONS pkey_options[] = {
+OPTIONS pkey_options[] = {
     {"help", OPT_HELP, '-', "Display this summary"},
     {"inform", OPT_INFORM, 'f', "Input format (DER or PEM)"},
     {"outform", OPT_OUTFORM, 'F', "Output format (DER or PEM)"},
@@ -42,8 +41,6 @@ const OPTIONS pkey_options[] = {
 #ifndef OPENSSL_NO_ENGINE
     {"engine", OPT_ENGINE, 's', "Use engine, possibly a hardware device"},
 #endif
-    {"check", OPT_CHECK, '-', "Check key consistency"},
-    {"pubcheck", OPT_PUB_CHECK, '-', "Check public key consistency"},
     {NULL}
 };
 
@@ -58,7 +55,7 @@ int pkey_main(int argc, char **argv)
     OPTION_CHOICE o;
     int informat = FORMAT_PEM, outformat = FORMAT_PEM;
     int pubin = 0, pubout = 0, pubtext = 0, text = 0, noout = 0, ret = 1;
-    int private = 0, traditional = 0, check = 0, pub_check = 0;
+    int private = 0, traditional = 0;
 
     prog = opt_init(argc, argv, pkey_options);
     while ((o = opt_next()) != OPT_EOF) {
@@ -113,12 +110,6 @@ int pkey_main(int argc, char **argv)
         case OPT_TRADITIONAL:
             traditional = 1;
             break;
-        case OPT_CHECK:
-            check = 1;
-            break;
-        case OPT_PUB_CHECK:
-            pub_check = 1;
-            break;
         case OPT_MD:
             if (!opt_cipher(opt_unknown(), &cipher))
                 goto opthelp;
@@ -145,43 +136,8 @@ int pkey_main(int argc, char **argv)
         pkey = load_pubkey(infile, informat, 1, passin, e, "Public Key");
     else
         pkey = load_key(infile, informat, 1, passin, e, "key");
-    if (pkey == NULL)
+    if (!pkey)
         goto end;
-
-    if (check || pub_check) {
-        int r;
-        EVP_PKEY_CTX *ctx;
-
-        ctx = EVP_PKEY_CTX_new(pkey, e);
-        if (ctx == NULL) {
-            ERR_print_errors(bio_err);
-            goto end;
-        }
-
-        if (check)
-            r = EVP_PKEY_check(ctx);
-        else
-            r = EVP_PKEY_public_check(ctx);
-
-        if (r == 1) {
-            BIO_printf(out, "Key is valid\n");
-        } else {
-            /*
-             * Note: at least for RSA keys if this function returns
-             * -1, there will be no error reasons.
-             */
-            unsigned long err;
-
-            BIO_printf(out, "Key is invalid\n");
-
-            while ((err = ERR_peek_error()) != 0) {
-                BIO_printf(out, "Detailed error: %s\n",
-                           ERR_reason_error_string(err));
-                ERR_get_error(); /* remove err from error stack */
-            }
-        }
-        EVP_PKEY_CTX_free(ctx);
-    }
 
     if (!noout) {
         if (outformat == FORMAT_PEM) {
@@ -214,6 +170,7 @@ int pkey_main(int argc, char **argv)
             BIO_printf(bio_err, "Bad format specified for key\n");
             goto end;
         }
+
     }
 
     if (text) {

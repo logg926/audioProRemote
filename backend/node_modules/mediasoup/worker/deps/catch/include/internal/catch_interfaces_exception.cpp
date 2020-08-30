@@ -1,4 +1,4 @@
-#include "catch_interfaces_exception.h"
+#include "internal/catch_interfaces_exception.h"
 
 namespace Catch {
     IExceptionTranslator::~IExceptionTranslator() = default;

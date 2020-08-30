@@ -46,7 +46,6 @@ namespace Catch {
     {
         if( !IMutableContext::currentContext )
             IMutableContext::createContext();
-        // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.UndefReturn)
         return *IMutableContext::currentContext;
     }
 
@@ -56,9 +55,6 @@ namespace Catch {
     }
 
     void cleanUpContext();
-
-    class SimplePcg32;
-    SimplePcg32& rng();
 }
 
 #endif // TWOBLUECUBES_CATCH_CONTEXT_H_INCLUDED

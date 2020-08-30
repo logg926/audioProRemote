@@ -7,11 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-/*
- * This file is dual-licensed and is also available under the following
- * terms:
- *
- * Copyright (c) 2004 Kungliga Tekniska Högskolan
+/* Copyright (c) 2004 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * All rights reserved.
  *

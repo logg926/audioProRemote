@@ -1,4 +1,4 @@
-# Copyright 2016-2019 The OpenSSL Project Authors. All Rights Reserved.
+# Copyright 2016 The OpenSSL Project Authors. All Rights Reserved.
 #
 # Licensed under the OpenSSL license (the "License").  You may not use
 # this file except in compliance with the License.  You can obtain a copy
@@ -20,7 +20,7 @@ sub new
         $records,
         $startoffset,
         $message_frag_lens) = @_;
-
+    
     my $self = $class->SUPER::new(
         $server,
         TLSProxy::Message::MT_SERVER_KEY_EXCHANGE,
@@ -33,7 +33,6 @@ sub new
     $self->{p} = "";
     $self->{g} = "";
     $self->{pub_key} = "";
-    $self->{sigalg} = -1;
     $self->{sig} = "";
 
     return $self;
@@ -42,13 +41,10 @@ sub new
 sub parse
 {
     my $self = shift;
-    my $sigalg = -1;
 
-    #Minimal SKE parsing. Only supports one known DHE ciphersuite at the moment
-    return if TLSProxy::Proxy->ciphersuite()
-                 != TLSProxy::Message::CIPHER_ADH_AES_128_SHA
-              && TLSProxy::Proxy->ciphersuite()
-                 != TLSProxy::Message::CIPHER_DHE_RSA_AES_128_SHA;
+    #Minimal SKE parsing. Only supports DHE at the moment (if its not DHE
+    #the parsing data will be trash...which is ok as long as we don't try to
+    #use it)
 
     my $p_len = unpack('n', $self->data);
     my $ptr = 2;
@@ -66,28 +62,18 @@ sub parse
     $ptr += $pub_key_len;
 
     #We assume its signed
-    my $record = ${$self->records}[0];
-
-    if (TLSProxy::Proxy->is_tls13()
-            || $record->version() == TLSProxy::Record::VERS_TLS_1_2) {
-        $sigalg = unpack('n', substr($self->data, $ptr));
-        $ptr += 2;
-    }
+    my $sig_len = unpack('n', substr($self->data, $ptr));
     my $sig = "";
-    if (defined $sigalg) {
-        my $sig_len = unpack('n', substr($self->data, $ptr));
-        if (defined $sig_len) {
-            $ptr += 2;
-            $sig = substr($self->data, $ptr, $sig_len);
-            $ptr += $sig_len;
-        }
+    if (defined $sig_len) {
+	$ptr += 2;
+	$sig = substr($self->data, $ptr, $sig_len);
+	$ptr += $sig_len;
     }
 
     $self->p($p);
     $self->g($g);
     $self->pub_key($pub_key);
-    $self->sigalg($sigalg) if defined $sigalg;
-    $self->signature($sig);
+    $self->sig($sig);
 }
 
 
@@ -103,10 +89,9 @@ sub set_message_contents
     $data .= $self->g;
     $data .= pack('n', length($self->pub_key));
     $data .= $self->pub_key;
-    $data .= pack('n', $self->sigalg) if ($self->sigalg != -1);
-    if (length($self->signature) > 0) {
-        $data .= pack('n', length($self->signature));
-        $data .= $self->signature;
+    if (length($self->sig) > 0) {
+        $data .= pack('n', length($self->sig));
+        $data .= $self->sig;
     }
 
     $self->data($data);
@@ -138,15 +123,7 @@ sub pub_key
     }
     return $self->{pub_key};
 }
-sub sigalg
-{
-    my $self = shift;
-    if (@_) {
-      $self->{sigalg} = shift;
-    }
-    return $self->{sigalg};
-}
-sub signature
+sub sig
 {
     my $self = shift;
     if (@_) {

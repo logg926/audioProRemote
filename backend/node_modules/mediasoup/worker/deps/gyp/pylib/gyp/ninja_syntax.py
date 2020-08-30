@@ -149,14 +149,6 @@ class Writer(object):
             return []
         if isinstance(input, list):
             return input
-
-        # map is not a class in Python 2
-        try:
-            if isinstance(input, map):
-                return list(input)
-        except TypeError:
-            pass
-
         return [input]
 
 

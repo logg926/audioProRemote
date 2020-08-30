@@ -1,5 +1,5 @@
 /*
- * Copyright 1998-2017 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1998-2016 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -19,13 +19,12 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <stdlib.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
 #define CERT_FILE       "server.pem"
 
-static volatile int done = 0;
+static int done = 0;
 
 void interrupt(int sig)
 {
@@ -52,7 +51,7 @@ int main(int argc, char *argv[])
     BIO *ssl_bio, *tmp;
     SSL_CTX *ctx;
     char buf[512];
-    int ret = EXIT_FAILURE, i;
+    int ret = 1, i;
 
     if (argc <= 1)
         port = "*:4433";
@@ -112,10 +111,12 @@ int main(int argc, char *argv[])
         fflush(stdout);
     }
 
-    ret = EXIT_SUCCESS;
+    ret = 0;
  err:
-    if (ret != EXIT_SUCCESS)
+    if (ret) {
         ERR_print_errors_fp(stderr);
+    }
     BIO_free(in);
-    return ret;
+    exit(ret);
+    return (!ret);
 }

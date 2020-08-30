@@ -9,9 +9,7 @@
 
 #include <stddef.h>
 
-#define POLY1305_BLOCK_SIZE  16
-#define POLY1305_DIGEST_SIZE 16
-#define POLY1305_KEY_SIZE    32
+#define POLY1305_BLOCK_SIZE 16
 
 typedef struct poly1305_context POLY1305;
 

@@ -13,7 +13,6 @@ use warnings;
 use POSIX;
 use File::Path 2.00 qw/rmtree/;
 use OpenSSL::Test qw/:DEFAULT cmdstr srctop_file/;
-use OpenSSL::Test::Utils;
 
 setup("test_ca");
 
@@ -23,32 +22,25 @@ my $std_openssl_cnf =
 
 rmtree("demoCA", { safe => 0 });
 
-plan tests => 5;
+plan tests => 4;
  SKIP: {
      $ENV{OPENSSL_CONFIG} = '-config "'.srctop_file("test", "CAss.cnf").'"';
-     skip "failed creating CA structure", 4
+     skip "failed creating CA structure", 3
 	 if !ok(run(perlapp(["CA.pl","-newca"], stdin => undef)),
 		'creating CA structure');
 
      $ENV{OPENSSL_CONFIG} = '-config "'.srctop_file("test", "Uss.cnf").'"';
-     skip "failed creating new certificate request", 3
+     skip "failed creating new certificate request", 2
 	 if !ok(run(perlapp(["CA.pl","-newreq"])),
 		'creating certificate request');
 
-     $ENV{OPENSSL_CONFIG} = '-rand_serial -config "'.$std_openssl_cnf.'"';
-     skip "failed to sign certificate request", 2
+     $ENV{OPENSSL_CONFIG} = '-config "'.$std_openssl_cnf.'"';
+     skip "failed to sign certificate request", 1
 	 if !is(yes(cmdstr(perlapp(["CA.pl", "-sign"]))), 0,
 		'signing certificate request');
 
      ok(run(perlapp(["CA.pl", "-verify", "newcert.pem"])),
         'verifying new certificate');
-
-     skip "CT not configured, can't use -precert", 1
-         if disabled("ct");
-
-     $ENV{OPENSSL_CONFIG} = '-config "'.srctop_file("test", "Uss.cnf").'"';
-     ok(run(perlapp(["CA.pl", "-precert"], stderr => undef)),
-        'creating new pre-certificate');
 }
 
 

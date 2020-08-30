@@ -44,15 +44,6 @@ namespace Matchers {
             virtual bool match( ObjectT const& arg ) const = 0;
         };
 
-#if defined(__OBJC__)
-        // Hack to fix Catch GH issue #1661. Could use id for generic Object support.
-        // use of const for Object pointers is very uncommon and under ARC it causes some kind of signature mismatch that breaks compilation
-        template<>
-        struct MatcherMethod<NSString*> {
-            virtual bool match( NSString* arg ) const = 0;
-        };
-#endif
-
 #ifdef __clang__
 #    pragma clang diagnostic pop
 #endif
@@ -91,10 +82,9 @@ namespace Matchers {
                 return description;
             }
 
-            MatchAllOf<ArgT> operator && ( MatcherBase<ArgT> const& other ) {
-                auto copy(*this);
-                copy.m_matchers.push_back( &other );
-                return copy;
+            MatchAllOf<ArgT>& operator && ( MatcherBase<ArgT> const& other ) {
+                m_matchers.push_back( &other );
+                return *this;
             }
 
             std::vector<MatcherBase<ArgT> const*> m_matchers;
@@ -125,10 +115,9 @@ namespace Matchers {
                 return description;
             }
 
-            MatchAnyOf<ArgT> operator || ( MatcherBase<ArgT> const& other ) {
-                auto copy(*this);
-                copy.m_matchers.push_back( &other );
-                return copy;
+            MatchAnyOf<ArgT>& operator || ( MatcherBase<ArgT> const& other ) {
+                m_matchers.push_back( &other );
+                return *this;
             }
 
             std::vector<MatcherBase<ArgT> const*> m_matchers;

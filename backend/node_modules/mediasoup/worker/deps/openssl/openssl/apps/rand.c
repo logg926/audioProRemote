@@ -8,7 +8,6 @@
  */
 
 #include "apps.h"
-#include "progs.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -20,16 +19,16 @@
 
 typedef enum OPTION_choice {
     OPT_ERR = -1, OPT_EOF = 0, OPT_HELP,
-    OPT_OUT, OPT_ENGINE, OPT_BASE64, OPT_HEX,
-    OPT_R_ENUM
+    OPT_OUT, OPT_ENGINE, OPT_RAND, OPT_BASE64, OPT_HEX
 } OPTION_CHOICE;
 
-const OPTIONS rand_options[] = {
+OPTIONS rand_options[] = {
     {OPT_HELP_STR, 1, '-', "Usage: %s [flags] num\n"},
     {OPT_HELP_STR, 1, '-', "Valid options are:\n"},
     {"help", OPT_HELP, '-', "Display this summary"},
     {"out", OPT_OUT, '>', "Output file"},
-    OPT_R_OPTIONS,
+    {"rand", OPT_RAND, 's',
+     "Load the file(s) into the random number generator"},
     {"base64", OPT_BASE64, '-', "Base64 encode output"},
     {"hex", OPT_HEX, '-', "Hex encode output"},
 #ifndef OPENSSL_NO_ENGINE
@@ -42,7 +41,7 @@ int rand_main(int argc, char **argv)
 {
     ENGINE *e = NULL;
     BIO *out = NULL;
-    char *outfile = NULL, *prog;
+    char *inrand = NULL, *outfile = NULL, *prog;
     OPTION_CHOICE o;
     int format = FORMAT_BINARY, i, num = -1, r, ret = 1;
 
@@ -64,9 +63,8 @@ int rand_main(int argc, char **argv)
         case OPT_ENGINE:
             e = setup_engine(opt_arg(), 0);
             break;
-        case OPT_R_CASES:
-            if (!opt_rand(o))
-                goto end;
+        case OPT_RAND:
+            inrand = opt_arg();
             break;
         case OPT_BASE64:
             format = FORMAT_BASE64;
@@ -85,6 +83,11 @@ int rand_main(int argc, char **argv)
         BIO_printf(bio_err, "Extra arguments given.\n");
         goto opthelp;
     }
+
+    app_RAND_load_file(NULL, (inrand != NULL));
+    if (inrand != NULL)
+        BIO_printf(bio_err, "%ld semi-random bytes loaded\n",
+                   app_RAND_load_files(inrand));
 
     out = bio_open_default(outfile, 'w', format);
     if (out == NULL)
@@ -119,7 +122,7 @@ int rand_main(int argc, char **argv)
     }
     if (format == FORMAT_TEXT)
         BIO_puts(out, "\n");
-    if (BIO_flush(out) <= 0)
+    if (BIO_flush(out) <= 0 || !app_RAND_write_file(NULL))
         goto end;
 
     ret = 0;
@@ -129,5 +132,5 @@ int rand_main(int argc, char **argv)
         ERR_print_errors(bio_err);
     release_engine(e);
     BIO_free_all(out);
-    return ret;
+    return (ret);
 }

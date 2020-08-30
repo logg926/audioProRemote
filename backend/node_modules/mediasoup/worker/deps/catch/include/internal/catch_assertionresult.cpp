@@ -45,7 +45,7 @@ namespace Catch {
     }
 
     bool AssertionResult::hasExpression() const {
-        return !m_info.capturedExpression.empty();
+        return m_info.capturedExpression[0] != 0;
     }
 
     bool AssertionResult::hasMessage() const {
@@ -53,22 +53,16 @@ namespace Catch {
     }
 
     std::string AssertionResult::getExpression() const {
-        // Possibly overallocating by 3 characters should be basically free
-        std::string expr; expr.reserve(m_info.capturedExpression.size() + 3);
-        if (isFalseTest(m_info.resultDisposition)) {
-            expr += "!(";
-        }
-        expr += m_info.capturedExpression;
-        if (isFalseTest(m_info.resultDisposition)) {
-            expr += ')';
-        }
-        return expr;
+        if( isFalseTest( m_info.resultDisposition ) )
+            return "!(" + m_info.capturedExpression + ")";
+        else
+            return m_info.capturedExpression;
     }
 
     std::string AssertionResult::getExpressionInMacro() const {
         std::string expr;
-        if( m_info.macroName.empty() )
-            expr = static_cast<std::string>(m_info.capturedExpression);
+        if( m_info.macroName[0] == 0 )
+            expr = m_info.capturedExpression;
         else {
             expr.reserve( m_info.macroName.size() + m_info.capturedExpression.size() + 4 );
             expr += m_info.macroName;

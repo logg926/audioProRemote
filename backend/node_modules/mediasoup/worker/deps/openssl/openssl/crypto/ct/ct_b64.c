@@ -24,7 +24,7 @@
 static int ct_base64_decode(const char *in, unsigned char **out)
 {
     size_t inlen = strlen(in);
-    int outlen, i;
+    int outlen;
     unsigned char *outbuf = NULL;
 
     if (inlen == 0) {
@@ -45,12 +45,9 @@ static int ct_base64_decode(const char *in, unsigned char **out)
         goto err;
     }
 
-    /* Subtract padding bytes from |outlen|.  Any more than 2 is malformed. */
-    i = 0;
+    /* Subtract padding bytes from |outlen| */
     while (in[--inlen] == '=') {
         --outlen;
-        if (++i > 2)
-            goto err;
     }
 
     *out = outbuf;
@@ -135,7 +132,7 @@ SCT *SCT_new_from_base64(unsigned char version, const char *logid_base64,
 int CTLOG_new_from_base64(CTLOG **ct_log, const char *pkey_base64, const char *name)
 {
     unsigned char *pkey_der = NULL;
-    int pkey_der_len;
+    int pkey_der_len = ct_base64_decode(pkey_base64, &pkey_der);
     const unsigned char *p;
     EVP_PKEY *pkey = NULL;
 
@@ -144,8 +141,7 @@ int CTLOG_new_from_base64(CTLOG **ct_log, const char *pkey_base64, const char *n
         return 0;
     }
 
-    pkey_der_len = ct_base64_decode(pkey_base64, &pkey_der);
-    if (pkey_der_len < 0) {
+    if (pkey_der_len <= 0) {
         CTerr(CT_F_CTLOG_NEW_FROM_BASE64, CT_R_LOG_CONF_INVALID_KEY);
         return 0;
     }

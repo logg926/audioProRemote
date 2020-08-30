@@ -7,6 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
+/* Original version from Steven Schoch <schoch@sheba.arc.nasa.gov> */
+
 #include "internal/cryptlib.h"
 #include "dsa_locl.h"
 

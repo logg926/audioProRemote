@@ -70,11 +70,10 @@ int SCT_set_log_entry_type(SCT *sct, ct_log_entry_type_t entry_type)
     case CT_LOG_ENTRY_TYPE_PRECERT:
         sct->entry_type = entry_type;
         return 1;
-    case CT_LOG_ENTRY_TYPE_NOT_SET:
-        break;
+    default:
+        CTerr(CT_F_SCT_SET_LOG_ENTRY_TYPE, CT_R_UNSUPPORTED_ENTRY_TYPE);
+        return 0;
     }
-    CTerr(CT_F_SCT_SET_LOG_ENTRY_TYPE, CT_R_UNSUPPORTED_ENTRY_TYPE);
-    return 0;
 }
 
 int SCT_set0_log_id(SCT *sct, unsigned char *log_id, size_t log_id_len)
@@ -275,11 +274,9 @@ int SCT_set_source(SCT *sct, sct_source_t source)
         return SCT_set_log_entry_type(sct, CT_LOG_ENTRY_TYPE_X509);
     case SCT_SOURCE_X509V3_EXTENSION:
         return SCT_set_log_entry_type(sct, CT_LOG_ENTRY_TYPE_PRECERT);
-    case SCT_SOURCE_UNKNOWN:
-        break;
+    default: /* if we aren't sure, leave the log entry type alone */
+        return 1;
     }
-    /* if we aren't sure, leave the log entry type alone */
-    return 1;
 }
 
 sct_validation_status_t SCT_get_validation_status(const SCT *sct)

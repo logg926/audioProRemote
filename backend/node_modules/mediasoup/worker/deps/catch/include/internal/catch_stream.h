@@ -9,8 +9,6 @@
 #ifndef TWOBLUECUBES_CATCH_STREAM_H_INCLUDED
 #define TWOBLUECUBES_CATCH_STREAM_H_INCLUDED
 
-#include "catch_common.h"
-
 #include <iosfwd>
 #include <cstddef>
 #include <ostream>
@@ -30,7 +28,7 @@ namespace Catch {
 
     auto makeStream( StringRef const &filename ) -> IStream const*;
 
-    class ReusableStringStream : NonCopyable {
+    class ReusableStringStream {
         std::size_t m_index;
         std::ostream* m_oss;
     public:

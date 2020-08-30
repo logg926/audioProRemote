@@ -28,8 +28,6 @@ not be able to find the header file directories described in the generated
 CMakeLists.txt file.
 """
 
-from __future__ import print_function
-
 import multiprocessing
 import os
 import signal
@@ -37,12 +35,6 @@ import string
 import subprocess
 import gyp.common
 import gyp.xcode_emulation
-
-try:
-  # maketrans moved to str in python3.
-  _maketrans = string.maketrans
-except NameError:
-  _maketrans = str.maketrans
 
 generator_default_variables = {
   'EXECUTABLE_PREFIX': '',
@@ -246,7 +238,7 @@ def StringToCMakeTargetName(a):
   Invalid for make: ':'
   Invalid for unknown reasons but cause failures: '.'
   """
-  return a.translate(_maketrans(' /():."', '_______'))
+  return a.translate(string.maketrans(' /():."', '_______'))
 
 
 def WriteActions(target_name, actions, extra_sources, extra_deps,
@@ -652,8 +644,8 @@ def WriteTarget(namer, qualified_target, target_dicts, build_dir, config_to_use,
 
   cmake_target_type = cmake_target_type_from_gyp_target_type.get(target_type)
   if cmake_target_type is None:
-    print('Target %s has unknown target type %s, skipping.' %
-          (        target_name,               target_type  ))
+    print ('Target %s has unknown target type %s, skipping.' %
+          (        target_name,               target_type  ) )
     return
 
   SetVariable(output, 'TARGET', target_name)
@@ -876,8 +868,8 @@ def WriteTarget(namer, qualified_target, target_dicts, build_dir, config_to_use,
       default_product_ext = generator_default_variables['SHARED_LIB_SUFFIX']
 
     elif target_type != 'executable':
-      print(('ERROR: What output file should be generated?',
-              'type', target_type, 'target', target_name))
+      print ('ERROR: What output file should be generated?',
+              'type', target_type, 'target', target_name)
 
     product_prefix = spec.get('product_prefix', default_product_prefix)
     product_name = spec.get('product_name', default_product_name)
@@ -1215,11 +1207,11 @@ def PerformBuild(data, configurations, params):
                                               output_dir,
                                               config_name))
     arguments = ['cmake', '-G', 'Ninja']
-    print('Generating [%s]: %s' % (config_name, arguments))
+    print 'Generating [%s]: %s' % (config_name, arguments)
     subprocess.check_call(arguments, cwd=build_dir)
 
     arguments = ['ninja', '-C', build_dir]
-    print('Building [%s]: %s' % (config_name, arguments))
+    print 'Building [%s]: %s' % (config_name, arguments)
     subprocess.check_call(arguments)
 
 
@@ -1238,7 +1230,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
     GenerateOutputForConfig(target_list, target_dicts, data,
                             params, user_config)
   else:
-    config_names = target_dicts[target_list[0]]['configurations']
+    config_names = target_dicts[target_list[0]]['configurations'].keys()
     if params['parallel']:
       try:
         pool = multiprocessing.Pool(len(config_names))
@@ -1247,7 +1239,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
           arglists.append((target_list, target_dicts, data,
                            params, config_name))
           pool.map(CallGenerateOutputForConfig, arglists)
-      except KeyboardInterrupt as e:
+      except KeyboardInterrupt, e:
         pool.terminate()
         raise e
     else:

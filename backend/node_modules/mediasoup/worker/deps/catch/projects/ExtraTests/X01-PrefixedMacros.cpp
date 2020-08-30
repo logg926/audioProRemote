@@ -48,7 +48,6 @@ CATCH_TEST_CASE("PrefixedMacros") {
     CATCH_CHECK_THAT("bdef", Equals("bdef"));
 
     CATCH_INFO( "some info" );
-    CATCH_UNSCOPED_INFO( "some info" );
     CATCH_WARN( "some warn" );
     CATCH_SECTION("some section") {
         int i = 1;

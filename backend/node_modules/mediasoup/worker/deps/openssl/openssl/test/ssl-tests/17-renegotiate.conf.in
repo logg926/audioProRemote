@@ -1,5 +1,5 @@
 # -*- mode: perl; -*-
-# Copyright 2016-2016 The OpenSSL Project Authors. All Rights Reserved.
+# Copyright 2016-2018 The OpenSSL Project Authors. All Rights Reserved.
 #
 # Licensed under the OpenSSL license (the "License").  You may not use
 # this file except in compliance with the License.  You can obtain a copy
@@ -19,8 +19,7 @@ our @tests = (
     {
         name => "renegotiate-client-no-resume",
         server => {
-            "Options" => "NoResumptionOnRenegotiation",
-            "MaxProtocol" => "TLSv1.2"
+            "Options" => "NoResumptionOnRenegotiation"
         },
         client => {},
         test => {
@@ -32,9 +31,7 @@ our @tests = (
     },
     {
         name => "renegotiate-client-resume",
-        server => {
-            "MaxProtocol" => "TLSv1.2"
-        },
+        server => {},
         client => {},
         test => {
             "Method" => "TLS",
@@ -46,8 +43,7 @@ our @tests = (
     {
         name => "renegotiate-server-no-resume",
         server => {
-            "Options" => "NoResumptionOnRenegotiation",
-            "MaxProtocol" => "TLSv1.2"
+            "Options" => "NoResumptionOnRenegotiation"
         },
         client => {},
         test => {
@@ -59,9 +55,7 @@ our @tests = (
     },
     {
         name => "renegotiate-server-resume",
-        server => {
-            "MaxProtocol" => "TLSv1.2"
-        },
+        server => {},
         client => {},
         test => {
             "Method" => "TLS",
@@ -114,10 +108,10 @@ our @tests_tls1_2 = (
         name => "renegotiate-aead-to-non-aead",
         server => {
             "Options" => "NoResumptionOnRenegotiation",
+            "MaxProtocol" => "TLSv1.2"
         },
         client => {
             "CipherString" => "AES128-GCM-SHA256",
-            "MaxProtocol" => "TLSv1.2",
             extra => {
                 "RenegotiateCiphers" => "AES128-SHA"
             }
@@ -133,10 +127,10 @@ our @tests_tls1_2 = (
         name => "renegotiate-non-aead-to-aead",
         server => {
             "Options" => "NoResumptionOnRenegotiation",
+            "MaxProtocol" => "TLSv1.2"
         },
         client => {
             "CipherString" => "AES128-SHA",
-            "MaxProtocol" => "TLSv1.2",
             extra => {
                 "RenegotiateCiphers" => "AES128-GCM-SHA256"
             }
@@ -152,10 +146,10 @@ our @tests_tls1_2 = (
         name => "renegotiate-non-aead-to-non-aead",
         server => {
             "Options" => "NoResumptionOnRenegotiation",
+            "MaxProtocol" => "TLSv1.2"
         },
         client => {
             "CipherString" => "AES128-SHA",
-            "MaxProtocol" => "TLSv1.2",
             extra => {
                 "RenegotiateCiphers" => "AES256-SHA"
             }
@@ -171,10 +165,10 @@ our @tests_tls1_2 = (
         name => "renegotiate-aead-to-aead",
         server => {
             "Options" => "NoResumptionOnRenegotiation",
+            "MaxProtocol" => "TLSv1.2"
         },
         client => {
             "CipherString" => "AES128-GCM-SHA256",
-            "MaxProtocol" => "TLSv1.2",
             extra => {
                 "RenegotiateCiphers" => "AES256-GCM-SHA384"
             }

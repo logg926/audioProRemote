@@ -1,4 +1,4 @@
-#include "catch_interfaces_registry_hub.h"
+#include "internal/catch_interfaces_registry_hub.h"
 
 namespace Catch {
     IRegistryHub::~IRegistryHub() = default;

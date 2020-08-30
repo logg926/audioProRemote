@@ -183,7 +183,8 @@ namespace Catch {
 
             SourceLineInfo lineInfo = m_sectionStack.front().lineInfo;
 
-            os << lineInfo << "\n";
+            if( !lineInfo.empty() )
+                os << lineInfo << "\n";
             os << getLineOfChars<'.'>() << "\n\n";
         }
 

@@ -14,14 +14,6 @@
 #include <vector>
 
 namespace Catch {
-    enum class XmlFormatting {
-        None = 0x00,
-        Indent = 0x01,
-        Newline = 0x02,
-    };
-
-    XmlFormatting operator | (XmlFormatting lhs, XmlFormatting rhs);
-    XmlFormatting operator & (XmlFormatting lhs, XmlFormatting rhs);
 
     class XmlEncode {
     public:
@@ -43,14 +35,14 @@ namespace Catch {
 
         class ScopedElement {
         public:
-            ScopedElement( XmlWriter* writer, XmlFormatting fmt );
+            ScopedElement( XmlWriter* writer );
 
             ScopedElement( ScopedElement&& other ) noexcept;
             ScopedElement& operator=( ScopedElement&& other ) noexcept;
 
             ~ScopedElement();
 
-            ScopedElement& writeText( std::string const& text, XmlFormatting fmt = XmlFormatting::Newline | XmlFormatting::Indent );
+            ScopedElement& writeText( std::string const& text, bool indent = true );
 
             template<typename T>
             ScopedElement& writeAttribute( std::string const& name, T const& attribute ) {
@@ -60,7 +52,6 @@ namespace Catch {
 
         private:
             mutable XmlWriter* m_writer = nullptr;
-            XmlFormatting m_fmt;
         };
 
         XmlWriter( std::ostream& os = Catch::cout() );
@@ -69,11 +60,11 @@ namespace Catch {
         XmlWriter( XmlWriter const& ) = delete;
         XmlWriter& operator=( XmlWriter const& ) = delete;
 
-        XmlWriter& startElement( std::string const& name, XmlFormatting fmt = XmlFormatting::Newline | XmlFormatting::Indent);
+        XmlWriter& startElement( std::string const& name );
 
-        ScopedElement scopedElement( std::string const& name, XmlFormatting fmt = XmlFormatting::Newline | XmlFormatting::Indent);
+        ScopedElement scopedElement( std::string const& name );
 
-        XmlWriter& endElement(XmlFormatting fmt = XmlFormatting::Newline | XmlFormatting::Indent);
+        XmlWriter& endElement();
 
         XmlWriter& writeAttribute( std::string const& name, std::string const& attribute );
 
@@ -86,9 +77,9 @@ namespace Catch {
             return writeAttribute( name, rss.str() );
         }
 
-        XmlWriter& writeText( std::string const& text, XmlFormatting fmt = XmlFormatting::Newline | XmlFormatting::Indent);
+        XmlWriter& writeText( std::string const& text, bool indent = true );
 
-        XmlWriter& writeComment(std::string const& text, XmlFormatting fmt = XmlFormatting::Newline | XmlFormatting::Indent);
+        XmlWriter& writeComment( std::string const& text );
 
         void writeStylesheetRef( std::string const& url );
 
@@ -97,8 +88,6 @@ namespace Catch {
         void ensureTagClosed();
 
     private:
-
-        void applyFormatting(XmlFormatting fmt);
 
         void writeDeclaration();
 

@@ -25,15 +25,11 @@
 #  endif
 # endif
 
-#include "e_os.h"
 #include "internal/cryptlib.h"
 
 #if !defined(OPENSSL_NO_STDIO)
 
 # include <stdio.h>
-# ifdef __DJGPP__
-#  include <unistd.h>
-# endif
 
 FILE *openssl_fopen(const char *filename, const char *mode)
 {
@@ -83,14 +79,13 @@ FILE *openssl_fopen(const char *filename, const char *mode)
     {
         char *newname = NULL;
 
-        if (pathconf(filename, _PC_NAME_MAX) <= 12) {  /* 8.3 file system? */
+        if (!HAS_LFN_SUPPORT(filename)) {
             char *iterator;
             char lastchar;
 
-            if ((newname = OPENSSL_malloc(strlen(filename) + 1)) == NULL) {
-                CRYPTOerr(CRYPTO_F_OPENSSL_FOPEN, ERR_R_MALLOC_FAILURE);
+            newname = OPENSSL_malloc(strlen(filename) + 1);
+            if (newname == NULL)
                 return NULL;
-            }
 
             for (iterator = newname, lastchar = '\0';
                 *filename; filename++, iterator++) {

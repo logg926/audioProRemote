@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2019 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "apps.h"
-#include "progs.h"
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
@@ -28,11 +27,11 @@ typedef enum OPTION_choice {
     OPT_ERR = -1, OPT_EOF = 0, OPT_HELP,
     OPT_ENGINE, OPT_CAPATH, OPT_CAFILE, OPT_NOCAPATH, OPT_NOCAFILE,
     OPT_UNTRUSTED, OPT_TRUSTED, OPT_CRLFILE, OPT_CRL_DOWNLOAD, OPT_SHOW_CHAIN,
-    OPT_V_ENUM, OPT_NAMEOPT,
+    OPT_V_ENUM,
     OPT_VERBOSE
 } OPTION_CHOICE;
 
-const OPTIONS verify_options[] = {
+OPTIONS verify_options[] = {
     {OPT_HELP_STR, 1, '-', "Usage: %s [options] cert.pem...\n"},
     {OPT_HELP_STR, 1, '-', "Valid options are:\n"},
     {"help", OPT_HELP, '-', "Display this summary"},
@@ -52,7 +51,6 @@ const OPTIONS verify_options[] = {
         "Attempt to download CRL information for this certificate"},
     {"show_chain", OPT_SHOW_CHAIN, '-',
         "Display information about the certificate chain"},
-    {"nameopt", OPT_NAMEOPT, 's', "Various certificate name options"},
     OPT_V_OPTIONS,
 #ifndef OPENSSL_NO_ENGINE
     {"engine", OPT_ENGINE, 's', "Use engine, possibly a hardware device"},
@@ -151,10 +149,6 @@ int verify_main(int argc, char **argv)
         case OPT_SHOW_CHAIN:
             show_chain = 1;
             break;
-        case OPT_NAMEOPT:
-            if (!set_nameopt(opt_arg()))
-                goto end;
-            break;
         case OPT_VERBOSE:
             v_verbose = 1;
             break;
@@ -230,9 +224,9 @@ static int check(X509_STORE *ctx, const char *file,
                (file == NULL) ? "stdin" : file);
         goto end;
     }
-    if (tchain != NULL)
+    if (tchain)
         X509_STORE_CTX_set0_trusted_stack(csc, tchain);
-    if (crls != NULL)
+    if (crls)
         X509_STORE_CTX_set0_crls(csc, crls);
     i = X509_verify_cert(csc);
     if (i > 0 && X509_STORE_CTX_get_error(csc) == X509_V_OK) {
@@ -249,7 +243,7 @@ static int check(X509_STORE *ctx, const char *file,
                 printf("depth=%d: ", j);
                 X509_NAME_print_ex_fp(stdout,
                                       X509_get_subject_name(cert),
-                                      0, get_nameopt());
+                                      0, XN_FLAG_ONELINE);
                 if (j < num_untrusted)
                     printf(" (untrusted)");
                 printf("\n");
@@ -275,10 +269,10 @@ static int cb(int ok, X509_STORE_CTX *ctx)
     X509 *current_cert = X509_STORE_CTX_get_current_cert(ctx);
 
     if (!ok) {
-        if (current_cert != NULL) {
+        if (current_cert) {
             X509_NAME_print_ex(bio_err,
                             X509_get_subject_name(current_cert),
-                            0, get_nameopt());
+                            0, XN_FLAG_ONELINE);
             BIO_printf(bio_err, "\n");
         }
         BIO_printf(bio_err, "%serror %d at %d depth lookup: %s\n",
@@ -286,19 +280,16 @@ static int cb(int ok, X509_STORE_CTX *ctx)
                cert_error,
                X509_STORE_CTX_get_error_depth(ctx),
                X509_verify_cert_error_string(cert_error));
-
-        /*
-         * Pretend that some errors are ok, so they don't stop further
-         * processing of the certificate chain.  Setting ok = 1 does this.
-         * After X509_verify_cert() is done, we verify that there were
-         * no actual errors, even if the returned value was positive.
-         */
         switch (cert_error) {
         case X509_V_ERR_NO_EXPLICIT_POLICY:
             policies_print(ctx);
             /* fall thru */
         case X509_V_ERR_CERT_HAS_EXPIRED:
-            /* Continue even if the leaf is a self signed cert */
+
+            /*
+             * since we are just checking the certificates, it is ok if they
+             * are self signed. But we should still warn the user.
+             */
         case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
             /* Continue after extension errors too */
         case X509_V_ERR_INVALID_CA:
@@ -318,5 +309,5 @@ static int cb(int ok, X509_STORE_CTX *ctx)
         policies_print(ctx);
     if (!v_verbose)
         ERR_clear_error();
-    return ok;
+    return (ok);
 }

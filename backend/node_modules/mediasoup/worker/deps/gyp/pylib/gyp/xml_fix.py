@@ -32,7 +32,8 @@ def _Replacement_writexml(self, writer, indent="", addindent="", newl=""):
   writer.write(indent+"<" + self.tagName)
 
   attrs = self._get_attributes()
-  a_names = sorted(attrs.keys())
+  a_names = attrs.keys()
+  a_names.sort()
 
   for a_name in a_names:
     writer.write(" %s=\"" % a_name)

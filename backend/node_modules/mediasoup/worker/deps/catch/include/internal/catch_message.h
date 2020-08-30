@@ -64,12 +64,9 @@ namespace Catch {
     class ScopedMessage {
     public:
         explicit ScopedMessage( MessageBuilder const& builder );
-        ScopedMessage( ScopedMessage& duplicate ) = delete;
-        ScopedMessage( ScopedMessage&& old );
         ~ScopedMessage();
 
         MessageInfo m_info;
-        bool m_moved;
     };
 
     class Capturer {

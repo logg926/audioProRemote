@@ -104,7 +104,7 @@ sub ::BC	{ @_;		}
 sub ::DWC	{ @_;		}
 
 sub ::file
-{   push(@out,".text\n");	}
+{   push(@out,".file\t\"$_[0].s\"\n.text\n");	}
 
 sub ::function_begin_B
 { my $func=shift;

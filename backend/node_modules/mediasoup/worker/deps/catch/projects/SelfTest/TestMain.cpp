@@ -13,7 +13,6 @@
 #include "reporters/catch_reporter_teamcity.hpp"
 #include "reporters/catch_reporter_tap.hpp"
 #include "reporters/catch_reporter_automake.hpp"
-#include "reporters/catch_reporter_sonarqube.hpp"
 
 
 // Some example tag aliases

@@ -30,10 +30,11 @@ use OpenSSL::Util::Pod;
 my %options = ();
 GetOptions(\%options,
            'sourcedir=s',       # Source directory
-           'section=i@',        # Subdirectories to look through,
+           'subdir=s%',         # Subdirectories to look through,
                                 # with associated section numbers
            'destdir=s',         # Destination directory
            #'in=s@',             # Explicit files to process (ignores sourcedir)
+           #'section=i',         # Default section used for --in files
            'type=s',            # The result type, 'man' or 'html'
            'suffix:s',          # Suffix to add to the extension.
                                 # Only used with type=man
@@ -42,13 +43,15 @@ GetOptions(\%options,
            'debug|D+',
           );
 
-unless ($options{section}) {
-    $options{section} = [ 1, 3, 5, 7 ];
+unless ($options{subdir}) {
+    $options{subdir} = { apps   => '1',
+                         crypto => '3',
+                         ssl    => '3' };
 }
 unless ($options{sourcedir}) {
     $options{sourcedir} = catdir($config{sourcedir}, "doc");
 }
-pod2usage(1) unless ( defined $options{section}
+pod2usage(1) unless ( defined $options{subdir}
                       && defined $options{sourcedir}
                       && defined $options{destdir}
                       && defined $options{type}
@@ -67,8 +70,8 @@ if ($options{debug}) {
         if defined $options{type};
     print STDERR "DEBUG:   --suffix    = $options{suffix}\n"
         if defined $options{suffix};
-    foreach (sort @{$options{section}}) {
-        print STDERR "DEBUG:   --section   = $_\n";
+    foreach (keys %{$options{subdir}}) {
+        print STDERR "DEBUG:   --subdir    = $_=$options{subdir}->{$_}\n";
     }
     print STDERR "DEBUG:   --remove    = $options{remove}\n"
         if defined $options{remove};
@@ -80,8 +83,8 @@ if ($options{debug}) {
 
 my $symlink_exists = eval { symlink("",""); 1 };
 
-foreach my $section (sort @{$options{section}}) {
-    my $subdir = "man$section";
+foreach my $subdir (keys %{$options{subdir}}) {
+    my $section = $options{subdir}->{$subdir};
     my $podsourcedir = catfile($options{sourcedir}, $subdir);
     my $podglob = catfile($podsourcedir, "*.pod");
 
@@ -98,7 +101,7 @@ foreach my $section (sort @{$options{section}}) {
         my $suffix = { man  => ".$podinfo{section}".($options{suffix} // ""),
                        html => ".html" } -> {$options{type}};
         my $generate = { man  => "pod2man --name=$name --section=$podinfo{section} --center=OpenSSL --release=$config{version} \"$podpath\"",
-                         html => "pod2html \"--podroot=$options{sourcedir}\" --htmldir=$updir --podpath=man1:man3:man5:man7 \"--infile=$podpath\" \"--title=$podname\" --quiet"
+                         html => "pod2html \"--podroot=$options{sourcedir}\" --htmldir=$updir --podpath=apps:crypto:ssl \"--infile=$podpath\" \"--title=$podname\" --quiet"
                          } -> {$options{type}};
         my $output_dir = catdir($options{destdir}, "man$podinfo{section}");
         my $output_file = $podname . $suffix;
@@ -110,7 +113,7 @@ foreach my $section (sort @{$options{section}}) {
                 if $options{debug};
             unless ($options{"dry-run"}) {
                 @output = `$generate`;
-                map { s|href="http://man\.he\.net/(man\d/[^"]+)(?:\.html)?"|href="../$1.html"|g; } @output
+                map { s|href="http://man\.he\.net/(man\d/[^"]+)(?:\.html)?"|href="../$1.html|g; } @output
                     if $options{type} eq "html";
                 if ($options{type} eq "man") {
                     # Because some *roff parsers are more strict than others,

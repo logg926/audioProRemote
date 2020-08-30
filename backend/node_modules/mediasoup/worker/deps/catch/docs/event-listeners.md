@@ -29,13 +29,13 @@ struct MyListener : Catch::TestEventListenerBase {
 
     using TestEventListenerBase::TestEventListenerBase; // inherit constructor
 
-    void testCaseStarting( Catch::TestCaseInfo const& testInfo ) override {
+    virtual void testCaseStarting( Catch::TestCaseInfo const& testInfo ) override {
         // Perform some setup before a test case is run
     }
     
-    void testCaseEnded( Catch::TestCaseStats const& testCaseStats ) override {
+    virtual void testCaseEnded( Catch::TestCaseStats const& testCaseStats ) override {
         // Tear-down after a test case is run
-    }
+    }    
 };
 CATCH_REGISTER_LISTENER( MyListener )
 ```
