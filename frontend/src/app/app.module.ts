@@ -6,15 +6,9 @@ import { AppComponent } from './app.component';
 import { VideoCallPageComponent } from './video-call-page/video-call-page.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    VideoCallPageComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule
-  ],
+  declarations: [AppComponent, VideoCallPageComponent],
+  imports: [BrowserModule, AppRoutingModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
