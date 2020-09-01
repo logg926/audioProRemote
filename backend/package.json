@@ -13,7 +13,6 @@
   "author": "Mykola Popko <Footniko@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "mediasoup": "^2.2.3",
     "socket.io": "^2.1.1"
   }
 }
