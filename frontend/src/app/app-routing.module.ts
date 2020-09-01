@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { RecieverComponentComponent } from './reciever-component/reciever-component.component';
-import { SenderComponentComponent } from './sender-component/sender-component.component';
+import { RecieverComponent } from './reciever/reciever-component/reciever-component.component';
+import { SenderComponentComponent } from './sender/sender-component/sender-component.component';
+import { SenderModule } from './sender/sender.module';
+import { RecieverModule } from './reciever/reciever.module';
 
 const routes: Routes = [
   { path: 'sender', component: SenderComponentComponent },
-  { path: 'reciever', component: RecieverComponentComponent },
+  { path: 'reciever', component: RecieverComponent },
 ];
 
 @NgModule({
@@ -14,8 +16,10 @@ const routes: Routes = [
       routes,
       { enableTracing: true } // <-- debugging purposes only
     ),
+    SenderModule,
+    RecieverModule,
   ],
-  declarations: [SenderComponentComponent, RecieverComponentComponent],
+  declarations: [],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

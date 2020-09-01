@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { SendingService } from '../services/sending.service';
+import { SendingService } from '../sending.service';
 
 @Component({
   selector: 'app-sender-component',
