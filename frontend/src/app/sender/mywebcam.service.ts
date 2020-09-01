@@ -3,7 +3,7 @@ import { Observable, of, Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class SendingService {
+export class MyWebCamService {
   constructor() {
     navigator.getUserMedia =
       navigator.getUserMedia ||

@@ -1,5 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { SendingService } from '../sending.service';
+import { MyWebCamService } from '../mywebcam.service';
+import { Socket } from 'ngx-socket-io';
 
 @Component({
   selector: 'app-sender-component',
@@ -7,9 +8,14 @@ import { SendingService } from '../sending.service';
   styleUrls: ['./sender-component.component.css'],
 })
 export class SenderComponentComponent implements OnInit {
-  constructor(private sendingService: SendingService) {}
+  constructor(
+    private sendingService: MyWebCamService,
+    private socket: Socket
+  ) {}
 
+  videoStream: MediaStream;
   subscription = this.sendingService.myWebCam$.subscribe((val) => {
+    this.videoStream = val;
     this.videoplayer.nativeElement.srcObject = val;
     this.toggleVideo();
   });
@@ -20,7 +26,10 @@ export class SenderComponentComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  startStreaming(): void {}
+  startStreaming(): void {
+    console.log('startStreaming');
+    this.socket.emit('signaling', 'hi');
+  }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
