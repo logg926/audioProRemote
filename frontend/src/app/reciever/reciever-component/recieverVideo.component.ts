@@ -37,10 +37,14 @@ export class RecieverComponent implements OnInit {
         console.log('Local ICE candidate: \n' + evt.candidate.candidate);
       }
     };
-    (this.rtcPeerConn as any).onaddstream = (evt) => {
-      this.videoplayer.nativeElement.srcObject = evt.stream;
-    };
+    // (this.rtcPeerConn as any).onaddstream = (evt) => {
+    //   console.log('stream added');
+    //   this.videoplayer.nativeElement.srcObject = evt.stream;
+    // };
 
+    this.rtcPeerConn.ontrack = (event) => {
+      this.videoplayer.nativeElement.srcObject = event.streams[0];
+    };
     this.socket
       .fromEvent<any>(SocketEvent.signalingMessage)
       .subscribe(async (val) => {

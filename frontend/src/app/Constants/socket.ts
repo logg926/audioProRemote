@@ -1,6 +1,7 @@
 export const SocketEvent = {
   signalingMessage: 'signaling_message',
   startSignaling: 'signaling',
+  signalAnswer: 'signaling_answer_message',
 };
 
 export const Constraints = {
