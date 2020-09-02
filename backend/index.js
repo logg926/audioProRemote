@@ -13,13 +13,17 @@ app.listen(port, () =>
 
 io.on("connection", (socket) => {
   console.log("a user connected");
-  socket.on("signaling", (signaling) => {
-    console.log("signaling: " + signaling);
-    // socket.broadcast.emit(signaling);
+  socket.on("signaling", (description) => {
+    console.log("signaling: " + description);
+    socket.broadcast.emit("signaling_message", description);
   });
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
+  });
+  socket.on("signaling_answer", (description) => {
+    console.log("signaling_answer: " + description);
+    socket.broadcast.emit("signaling_answer_message", description);
   });
 });
 // io.on("connection",(socket)=>{

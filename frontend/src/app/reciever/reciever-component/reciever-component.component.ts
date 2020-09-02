@@ -1,13 +1,72 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
 import { RecievingService } from '../recieving.service';
+import { Socket } from 'ngx-socket-io';
+
+import { SocketEvent } from '../../Constants/socket';
+import { Signaling } from 'src/app/model/signaling';
 @Component({
   selector: 'app-reciever-component',
   templateUrl: './reciever-component.component.html',
   styleUrls: ['./reciever-component.component.css'],
 })
 export class RecieverComponent implements OnInit {
-  constructor(private recievingService: RecievingService) {}
+  rtcPeerConn: webkitRTCPeerConnection;
 
-  ngOnInit(): void {}
+  @ViewChild('videoPlayer3') videoplayer: ElementRef;
+
+  videoStream: MediaStream;
+  constructor(
+    private recievingService: RecievingService,
+    private socket: Socket
+  ) {
+    this.rtcPeerConn = null;
+  }
+
+  startSignaling = () => {
+    this.rtcPeerConn = new webkitRTCPeerConnection({
+      iceServers: [
+        {
+          urls: 'stun:stun.l.google.com:19302',
+        },
+      ],
+    });
+    this.rtcPeerConn.onicecandidate = (evt) => {
+      if (evt.candidate) {
+        this.rtcPeerConn.addIceCandidate(new RTCIceCandidate(evt.candidate));
+        console.log('Local ICE candidate: \n' + evt.candidate.candidate);
+      }
+    };
+
+    // this.rtcPeerConn.onnegotiationneeded = () => {
+    //   if (this.rtcPeerConn.signalingState != 'stable') return;
+    // };
+    (this.rtcPeerConn as any).onaddstream = (evt) => {
+      this.videoplayer.nativeElement.srcObject = this.videoStream;
+    };
+    //   this.videoplayer.nativeElement.play();
+    // };
+    // this.rtcPeerConn.ontrack = (evt) => {
+    //   console.log('adding track');
+    //   this.videoStream = evt.streams[0];
+    //   this.videoplayer.nativeElement.srcObject = this.videoStream;
+    //   this.videoplayer.nativeElement.play();
+    // };
+  };
+
+  ngOnInit(): void {
+    this.startSignaling();
+    this.socket
+      .fromEvent<any>(SocketEvent.signalingMessage)
+      .subscribe(async (val) => {
+        console.log(val);
+        await this.rtcPeerConn.setRemoteDescription(val.message.sdp);
+        this.rtcPeerConn.createAnswer().then((desc) => {
+          this.rtcPeerConn.setLocalDescription(desc);
+
+          console.log('Answer from remotePeerConnection: \n' + desc.sdp);
+          this.socket.emit('signaling_answer', desc);
+        });
+      });
+  }
 }
