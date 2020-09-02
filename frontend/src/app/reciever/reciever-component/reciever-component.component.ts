@@ -37,21 +37,9 @@ export class RecieverComponent implements OnInit {
         console.log('Local ICE candidate: \n' + evt.candidate.candidate);
       }
     };
-
-    // this.rtcPeerConn.onnegotiationneeded = () => {
-    //   if (this.rtcPeerConn.signalingState != 'stable') return;
-    // };
     (this.rtcPeerConn as any).onaddstream = (evt) => {
-      this.videoplayer.nativeElement.srcObject = this.videoStream;
+      this.videoplayer.nativeElement.srcObject = evt.stream;
     };
-    //   this.videoplayer.nativeElement.play();
-    // };
-    // this.rtcPeerConn.ontrack = (evt) => {
-    //   console.log('adding track');
-    //   this.videoStream = evt.streams[0];
-    //   this.videoplayer.nativeElement.srcObject = this.videoStream;
-    //   this.videoplayer.nativeElement.play();
-    // };
   };
 
   ngOnInit(): void {
