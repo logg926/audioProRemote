@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { RecieverComponent } from './reciever/reciever-component/reciever-component.component';
-import { SenderComponentComponent } from './sender/sender-component/sender-component.component';
+import { RecieverComponent } from './reciever/reciever-component/recieverVideo.component';
+import { SenderComponentComponent } from './sender/sender-component/senderVideo.component';
 import { SenderModule } from './sender/sender.module';
 import { RecieverModule } from './reciever/reciever.module';
 

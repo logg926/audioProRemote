@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SenderComponentComponent } from './sender-component/sender-component.component';
+import { SenderComponentComponent } from './sender-component/senderVideo.component';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 const config: SocketIoConfig = {
   url: 'http://localhost:8080',

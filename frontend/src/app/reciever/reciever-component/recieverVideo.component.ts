@@ -7,8 +7,8 @@ import { SocketEvent } from '../../Constants/socket';
 import { Signaling } from 'src/app/model/signaling';
 @Component({
   selector: 'app-reciever-component',
-  templateUrl: './reciever-component.component.html',
-  styleUrls: ['./reciever-component.component.css'],
+  templateUrl: './recieverVideo.component.html',
+  styleUrls: ['./recieverVideo.component.css'],
 })
 export class RecieverComponent implements OnInit {
   rtcPeerConn: webkitRTCPeerConnection;
@@ -23,7 +23,7 @@ export class RecieverComponent implements OnInit {
     this.rtcPeerConn = null;
   }
 
-  startSignaling = () => {
+  ngOnInit(): void {
     this.rtcPeerConn = new webkitRTCPeerConnection({
       iceServers: [
         {
@@ -40,10 +40,7 @@ export class RecieverComponent implements OnInit {
     (this.rtcPeerConn as any).onaddstream = (evt) => {
       this.videoplayer.nativeElement.srcObject = evt.stream;
     };
-  };
 
-  ngOnInit(): void {
-    this.startSignaling();
     this.socket
       .fromEvent<any>(SocketEvent.signalingMessage)
       .subscribe(async (val) => {

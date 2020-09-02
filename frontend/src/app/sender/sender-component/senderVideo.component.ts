@@ -6,8 +6,8 @@ import { SocketEvent, Constraints } from '../../Constants/socket';
 
 @Component({
   selector: 'app-sender-component',
-  templateUrl: './sender-component.component.html',
-  styleUrls: ['./sender-component.component.css'],
+  templateUrl: './senderVideo.component.html',
+  styleUrls: ['./senderVideo.component.css'],
 })
 export class SenderComponentComponent implements OnInit {
   constructor(private sendingService: MyWebCamService, private socket: Socket) {
@@ -37,9 +37,6 @@ export class SenderComponentComponent implements OnInit {
       .subscribe(async (description) => {
         console.log('setRemoteDescription');
         this.rtcPeerConn.setRemoteDescription(description);
-
-        // tracks.forEach(async (track) => {
-        // });
       });
     this.rtcPeerConn.onicecandidate = (evt) => {
       if (evt.candidate) {
@@ -47,12 +44,6 @@ export class SenderComponentComponent implements OnInit {
         console.log('Local ICE candidate: \n' + evt.candidate.candidate);
       }
     };
-
-    // const tracks = this.videoStream.getVideoTracks();
-    // console.log('Created local peer connection object localPeerConnection');
-    // tracks[0].applyConstraints(Constraints).then(() => {
-    //   this.rtcPeerConn.addTrack(tracks[0]);
-    // });
   }
 
   async startSignaling() {
@@ -69,25 +60,6 @@ export class SenderComponentComponent implements OnInit {
           message: { sdp: this.rtcPeerConn.localDescription },
         });
       });
-
-    // this.rtcPeerConn.onnegotiationneeded = () => {
-    //   this.rtcPeerConn
-    //     .createOffer()
-    //     .then((desc: RTCSessionDescriptionInit) => {
-    //       return this.rtcPeerConn.setLocalDescription(desc);
-    //     })
-    //     .then(() => {
-    //       console.log('send local describtor');
-    //       this.socket.emit(SocketEvent.startSignaling, {
-    //         type: 'SDP',
-    //         message: { sdp: this.rtcPeerConn.localDescription },
-    //       });
-    //     });
-    // };
-  }
-
-  async startStreaming() {
-    (this.rtcPeerConn as any).addStream(this.videoStream);
   }
 
   ngOnDestroy() {
