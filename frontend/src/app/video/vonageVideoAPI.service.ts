@@ -21,10 +21,7 @@ function handleError(error) {
   providedIn: 'root',
 })
 export class VonageVideoAPI {
-  constructor(private http: HttpClient) {
-    this.recieverVid = new Subject<HTMLElement>();
-    this.recieverVid$ = this.recieverVid.asObservable();
-  }
+  constructor(private http: HttpClient) {}
 
   private initOTSession() {
     return this.initServer().pipe(
@@ -46,10 +43,10 @@ export class VonageVideoAPI {
     //   token,
     // };
   }
-
-  recieverVid: Subject<HTMLElement>;
-  recieverVid$: Observable<HTMLElement>;
-  recieverInitializeSession(todoWithStream: (MediaStream) => void) {
+  recieverInitializeSession(
+    todoWithStream: (MediaStream) => void,
+    videoParent
+  ) {
     return this.initOTSession().pipe(
       map((res) => {
         const { session, token } = res;
@@ -75,11 +72,9 @@ export class VonageVideoAPI {
             handleError
           );
           subscriber.on('videoElementCreated', (event) => {
-            this.recieverVid.next(event.element);
-            // videoParent.appendChild(event.element);
+            videoParent.appendChild(event.element);
           });
         });
-        // return this.recieverVid;
       })
     );
   }

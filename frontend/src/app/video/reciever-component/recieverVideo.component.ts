@@ -60,11 +60,11 @@ export class RecieverComponent implements OnInit {
 
   ngAfterViewInit() {
     this.vonageVideoAPI
-      .recieverInitializeSession(this.recordMediaStream)
+      .recieverInitializeSession(
+        this.recordMediaStream,
+        this.subscriber.nativeElement
+      )
       .subscribe(log);
-    this.vonageVideoAPI.recieverVid$.subscribe((element) => {
-      this.subscriber.nativeElement.appendChild(element);
-    });
   }
 }
 
