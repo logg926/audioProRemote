@@ -3,10 +3,12 @@ import { Routes, RouterModule } from '@angular/router';
 import { RecieverComponent } from './video/reciever-component/recieverVideo.component';
 import { SenderComponent } from './video/sender-component/senderVideo.component';
 import { VideoAPIModule } from './video/VideoAPI.module';
+import { SyncComponent } from './sync/sync.component';
 
 const routes: Routes = [
   { path: 'sender', component: SenderComponent },
   { path: 'reciever', component: RecieverComponent },
+  { path: 'sync', component: SyncComponent },
 ];
 
 @NgModule({

@@ -15,7 +15,7 @@ export class SenderComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('sender init session');
-    this.vonageVideoAPI.senderInitializeSession().subscribe(log);
+    this.vonageVideoAPI.senderInitializeSession('publisher').subscribe(log);
   }
 
   ngOnDestroy() {}

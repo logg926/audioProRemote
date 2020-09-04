@@ -4,14 +4,23 @@ html {
   height: 100%;
 }
 
-#videos {
+/* #videos {
   position: relative;
   width: 100%;
   height: 100%;
   margin-left: auto;
   margin-right: auto;
+} */
+#videos {
+  /* position: absolute; */
+  width: 360px;
+  height: 240px;
+  bottom: 10px;
+  left: 10px;
+  z-index: 100;
+  border: 3px solid white;
+  border-radius: 3px;
 }
-
 /* #subscriber {
   position: absolute;
   left: 0;

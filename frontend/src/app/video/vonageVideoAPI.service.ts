@@ -23,7 +23,18 @@ function handleError(error) {
 export class VonageVideoAPI {
   constructor(private http: HttpClient) {}
 
-  private initOTSession() {
+  private initServer(): Observable<VideoAPISession> {
+    return this.http.get<VideoAPISession>(
+      environment.VONAGE_VIDEOAPI_SERVER_BASE_URL + '/session'
+    );
+  }
+
+  private initOTSession(): Observable<{
+    session: any;
+    apiKey: string;
+    sessionId: string;
+    token: string;
+  }> {
     return this.initServer().pipe(
       map((res) => {
         const { apiKey, sessionId, token } = res;
@@ -35,17 +46,36 @@ export class VonageVideoAPI {
         };
       })
     );
-    // const { apiKey, sessionId, token } = this.initServer();
-    // return {
-    //   session: OT.initSession(apiKey, sessionId),
-    //   apiKey,
-    //   sessionId,
-    //   token,
-    // };
+  }
+
+  sendAudio(mediaStream: MediaStream, divIDToBeReplace: string = 'voice') {
+    return this.initOTSession().pipe(
+      map((res) => {
+        const pubOptions = { videoSource: null };
+        const { session, token } = res;
+        const publisher = OT.initPublisher(
+          divIDToBeReplace,
+          pubOptions,
+          handleError
+        );
+
+        return { publisher, session, token };
+      }),
+      map(({ publisher, session, token }) => {
+        session.connect(token, function (error) {
+          // If the connection is successful, publish to the session
+          if (error) {
+            handleError(error);
+          } else {
+            session.publish(publisher, handleError);
+          }
+        });
+      })
+    );
   }
   recieverInitializeSession(
     todoWithStream: (MediaStream) => void,
-    videoParent
+    divIDToBeReplace: string = 'subscriber'
   ) {
     return this.initOTSession().pipe(
       map((res) => {
@@ -62,47 +92,24 @@ export class VonageVideoAPI {
           todoWithStream(event.stream);
           const subscriber = session.subscribe(
             event.stream,
-            // 'subscriber',
+            divIDToBeReplace,
             {
-              insertDefaultUI: false,
-              // insertMode: 'append',
+              insertDefaultUI: true,
+              insertMode: 'replace',
               width: '100%',
               height: '100%',
             },
             handleError
           );
-          subscriber.on('videoElementCreated', (event) => {
-            videoParent.appendChild(event.element);
-          });
+          // subscriber.on('videoElementCreated', (event) => {
+          //   videoParent.appendChild(event.element);
+          // });
         });
       })
     );
   }
 
-  private initServer(): Observable<VideoAPISession> {
-    return this.http.get<VideoAPISession>(
-      environment.VONAGE_VIDEOAPI_SERVER_BASE_URL + '/session'
-    );
-
-    // fetch(SERVER_BASE_URL + '/session')
-    //   .then(function (res) {
-    //     return res.json();
-    //   })
-    //   .then(function (res) {
-    //     apiKey = res.apiKey;
-    //     sessionId = res.sessionId;
-    //     token = res.token;
-    //     initializeSession();
-    //   })
-    //   .catch(handleError);
-
-    // const apiKey = environment.VONAGE_API_KEY;
-    // const sessionId = environment.VONAGE_API_sessionId;
-    // const token = environment.VONAGE_API_token;
-    // return { apiKey, sessionId, token };
-  }
-
-  senderInitializeSession() {
+  senderInitializeSession(divIDToBeReplace: string = 'publisher') {
     return this.initOTSession().pipe(
       map((res) => {
         const { session, token } = res;
@@ -110,9 +117,9 @@ export class VonageVideoAPI {
 
         // Create a publisher
         const publisher = OT.initPublisher(
-          'publisher',
+          divIDToBeReplace,
           {
-            insertMode: 'append',
+            insertMode: 'replace',
             width: '100%',
             height: '100%',
           },

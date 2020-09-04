@@ -32,7 +32,7 @@ export class RecieverComponent implements OnInit {
   }
   recorders: recorderAndChunks[];
 
-  @ViewChild('subscriber') subscriber: ElementRef;
+  // @ViewChild('subscriber') subscriber: ElementRef;
 
   recordedChunks: any[];
 
@@ -60,24 +60,21 @@ export class RecieverComponent implements OnInit {
 
   ngAfterViewInit() {
     this.vonageVideoAPI
-      .recieverInitializeSession(
-        this.recordMediaStream,
-        this.subscriber.nativeElement
-      )
+      .recieverInitializeSession(this.recordMediaStream, 'subscriber')
       .subscribe(log);
   }
 }
 
-function download(recordedChunks) {
-  var blob = new Blob(recordedChunks, {
-    type: 'video/webm',
-  });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  document.body.appendChild(a);
-  // a.style = "display: none";
-  a.href = url;
-  a.download = 'test.webm';
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
+// function download(recordedChunks) {
+//   var blob = new Blob(recordedChunks, {
+//     type: 'video/webm',
+//   });
+//   var url = URL.createObjectURL(blob);
+//   var a = document.createElement('a');
+//   document.body.appendChild(a);
+//   // a.style = "display: none";
+//   a.href = url;
+//   a.download = 'test.webm';
+//   a.click();
+//   window.URL.revokeObjectURL(url);
+// }
