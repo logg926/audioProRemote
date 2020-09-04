@@ -1,13 +1,14 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { RecieverComponent } from './reciever/reciever-component/recieverVideo.component';
-import { SenderComponentComponent } from './sender/sender-component/senderVideo.component';
-import { SenderModule } from './sender/sender.module';
-import { RecieverModule } from './reciever/reciever.module';
+import { RecieverComponent } from './video/reciever-component/recieverVideo.component';
+import { SenderComponent } from './video/sender-component/senderVideo.component';
+import { VideoAPIModule } from './video/VideoAPI.module';
+import { SyncComponent } from './sync/sync.component';
 
 const routes: Routes = [
-  { path: 'sender', component: SenderComponentComponent },
+  { path: 'sender', component: SenderComponent },
   { path: 'reciever', component: RecieverComponent },
+  { path: 'sync', component: SyncComponent },
 ];
 
 @NgModule({
@@ -16,8 +17,7 @@ const routes: Routes = [
       routes,
       { enableTracing: true } // <-- debugging purposes only
     ),
-    SenderModule,
-    RecieverModule,
+    VideoAPIModule,
   ],
   declarations: [],
   exports: [RouterModule],

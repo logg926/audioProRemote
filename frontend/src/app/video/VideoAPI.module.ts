@@ -6,4 +6,4 @@ import { RecieverComponent } from './reciever-component/recieverVideo.component'
   declarations: [RecieverComponent],
   imports: [CommonModule],
 })
-export class RecieverModule {}
+export class VideoAPIModule {}
