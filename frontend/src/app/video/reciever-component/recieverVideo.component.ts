@@ -1,12 +1,17 @@
+/// <reference types="@types/dom-mediacapture-record" />
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
 import { VonageVideoAPI } from '../vonageVideoAPI.service';
 import { Socket } from 'ngx-socket-io';
 
 import { SocketEvent } from '../../Constants/socket';
-import { Signaling } from 'src/app/model/signaling';
 import { environment } from 'src/environments/environment';
 import { log } from '../../Helper/Helper';
+
+type recorderAndChunks = {
+  mediaRecorder: MediaRecorder;
+  recordedChunks: any[];
+};
 
 @Component({
   selector: 'app-reciever-component',
@@ -21,9 +26,58 @@ export class RecieverComponent implements OnInit {
   videoStream: MediaStream;
   constructor(
     private vonageVideoAPI: VonageVideoAPI // private socket: Socket
-  ) {}
-
-  ngOnInit(): void {
-    this.vonageVideoAPI.recieverInitializeSession().subscribe(log);
+  ) {
+    this.recorders = [];
+    this.recordedChunks = [];
   }
+  recorders: recorderAndChunks[];
+
+  @ViewChild('subscriber') subscriber: ElementRef;
+
+  recordedChunks: any[];
+
+  recordMediaStream(stream: MediaStream) {
+    log(stream);
+    const options: MediaRecorderOptions = {
+      mimeType: 'video/webm; codecs=vp9',
+    };
+    // const mediaRecorder = new MediaRecorder(stream, options);
+    // const recordedChunks = [];
+    // this.recorders.push({ mediaRecorder, recordedChunks });
+    // mediaRecorder.ondataavailable = (evt) => {
+    //   console.log('data-available');
+    //   if (evt.data.size > 0) {
+    //     recordedChunks.push(evt.data);
+    //     console.log(recordedChunks);
+    //     download(recordedChunks);
+    //   } else {
+    //     console.log('no data avaliable');
+    //   }
+    // };
+  }
+
+  ngOnInit(): void {}
+
+  ngAfterViewInit() {
+    this.vonageVideoAPI
+      .recieverInitializeSession(this.recordMediaStream)
+      .subscribe(log);
+    this.vonageVideoAPI.recieverVid$.subscribe((element) => {
+      this.subscriber.nativeElement.appendChild(element);
+    });
+  }
+}
+
+function download(recordedChunks) {
+  var blob = new Blob(recordedChunks, {
+    type: 'video/webm',
+  });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  document.body.appendChild(a);
+  // a.style = "display: none";
+  a.href = url;
+  a.download = 'test.webm';
+  a.click();
+  window.URL.revokeObjectURL(url);
 }

@@ -3,7 +3,7 @@ import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
 
 import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 declare let OT: any;
 
@@ -17,12 +17,14 @@ function handleError(error) {
     alert(error.message);
   }
 }
-
 @Injectable({
   providedIn: 'root',
 })
 export class VonageVideoAPI {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.recieverVid = new Subject<HTMLElement>();
+    this.recieverVid$ = this.recieverVid.asObservable();
+  }
 
   private initOTSession() {
     return this.initServer().pipe(
@@ -45,11 +47,13 @@ export class VonageVideoAPI {
     // };
   }
 
-  recieverInitializeSession() {
+  recieverVid: Subject<HTMLElement>;
+  recieverVid$: Observable<HTMLElement>;
+  recieverInitializeSession(todoWithStream: (MediaStream) => void) {
     return this.initOTSession().pipe(
       map((res) => {
         const { session, token } = res;
-        session.connect(token, function (error) {
+        session.connect(token, (error) => {
           // If the connection is successful, publish to the session
           if (error) {
             handleError(error);
@@ -57,18 +61,25 @@ export class VonageVideoAPI {
             // session.publish(publisher, handleError);
           }
         });
-        session.on('streamCreated', function (event) {
-          session.subscribe(
+        session.on('streamCreated', (event) => {
+          todoWithStream(event.stream);
+          const subscriber = session.subscribe(
             event.stream,
-            'subscriber',
+            // 'subscriber',
             {
-              insertMode: 'append',
+              insertDefaultUI: false,
+              // insertMode: 'append',
               width: '100%',
               height: '100%',
             },
             handleError
           );
+          subscriber.on('videoElementCreated', (event) => {
+            this.recieverVid.next(event.element);
+            // videoParent.appendChild(event.element);
+          });
         });
+        // return this.recieverVid;
       })
     );
   }

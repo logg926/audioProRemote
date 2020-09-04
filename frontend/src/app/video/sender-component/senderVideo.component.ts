@@ -10,19 +10,7 @@ import { log } from '../../Helper/Helper';
   styleUrls: ['./senderVideo.component.css'],
 })
 export class SenderComponent implements OnInit {
-  constructor(private vonageVideoAPI: VonageVideoAPI) {
-    // private sendingService: MyWebCamService
-    // this.rtcPeerConn = null;
-  }
-
-  // videoStream: MediaStream;
-
-  // rtcPeerConn: webkitRTCPeerConnection;
-  // subscription = this.sendingService.myWebCam$.subscribe((val) => {
-  //   this.videoStream = val;
-  //   this.videoplayer.nativeElement.srcObject = val;
-  //   this.videoplayer.nativeElement.play();
-  // });
+  constructor(private vonageVideoAPI: VonageVideoAPI) {}
   @ViewChild('videoPlayer') videoplayer: ElementRef;
 
   ngOnInit(): void {
