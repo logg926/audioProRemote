@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { SyncService } from 'src/app/sync/sync.service';
 import { VonageVideoAPI } from '../video/vonageVideoAPI.service';
-import { log } from '../Helper/Helper';
+import { log, err } from '../Helper/Helper';
 @Component({
   selector: 'app-sync',
   templateUrl: './sync.component.html',
@@ -37,7 +37,7 @@ export class SyncComponent implements OnInit {
 
       // The output buffer contains the samples that will be modified and played
       const outputBuffer = audioProcessingEvent.outputBuffer;
-
+      // log('hi');
       for (
         let channel = 0;
         channel < outputBuffer.numberOfChannels;
@@ -54,13 +54,21 @@ export class SyncComponent implements OnInit {
     // connect sourcenode with script node
     sourceNode.connect(scriptNode);
 
-    const mediaStreamNode = context.createMediaStreamDestination();
+    //test
+    var oscillator = context.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(440, context.currentTime); // value in hertz
 
+    const mediaStreamNode = context.createMediaStreamDestination();
     // connect turn script node to stream node with script node
-    scriptNode.connect(mediaStreamNode);
+    // scriptNode.connect(mediaStreamNode);
+
+    //test
+    oscillator.connect(mediaStreamNode);
+    oscillator.start();
 
     // scriptNode.connect(context.destination);
     // now mediaStreamNode.stream is an mediastream
-    this.vonageVideoAPI.sendAudio(mediaStreamNode.stream).subscribe(log);
+    this.vonageVideoAPI.sendAudio(mediaStreamNode.stream).subscribe(log, err);
   }
 }

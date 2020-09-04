@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { map } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
+import { log } from '../Helper/Helper';
 
 declare let OT: any;
 
@@ -48,10 +49,17 @@ export class VonageVideoAPI {
     );
   }
 
-  sendAudio(mediaStream: MediaStream, divIDToBeReplace: string = 'voice') {
+  sendAudio(
+    mediaStream: MediaStream,
+    divIDToBeReplace: string = 'voice'
+  ): Observable<void> {
     return this.initOTSession().pipe(
       map((res) => {
-        const pubOptions = { videoSource: null };
+        const audioTracks = mediaStream.getAudioTracks();
+        log('aud');
+        log(audioTracks);
+        const audioTrack = audioTracks[0];
+        const pubOptions = { videoSource: null, audioSource: audioTrack };
         const { session, token } = res;
         const publisher = OT.initPublisher(
           divIDToBeReplace,
@@ -62,7 +70,7 @@ export class VonageVideoAPI {
         return { publisher, session, token };
       }),
       map(({ publisher, session, token }) => {
-        session.connect(token, function (error) {
+        session.connect(token, (error) => {
           // If the connection is successful, publish to the session
           if (error) {
             handleError(error);
@@ -74,9 +82,9 @@ export class VonageVideoAPI {
     );
   }
   recieverInitializeSession(
-    todoWithStream: (MediaStream) => void,
+    todoWithStream: (stream: MediaStream) => void,
     divIDToBeReplace: string = 'subscriber'
-  ) {
+  ): Observable<void> {
     return this.initOTSession().pipe(
       map((res) => {
         const { session, token } = res;
