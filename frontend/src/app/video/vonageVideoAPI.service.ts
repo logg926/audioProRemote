@@ -5,15 +5,13 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { log } from '../Helper/Helper';
-
-declare let OT: any;
-
+import * as OT from '@opentok/client';
 interface VideoAPISession {
   apiKey: string;
   sessionId: string;
   token: string;
 }
-function handleError(error) {
+function handleError(error): void {
   if (error) {
     alert(error.message);
   }
@@ -56,9 +54,10 @@ export class VonageVideoAPI {
     return this.initOTSession().pipe(
       map((res) => {
         const audioTracks = mediaStream.getAudioTracks();
-        log('aud');
-        log(audioTracks);
-        const audioTrack = audioTracks[0];
+        // log('aud');
+        // log(audioTracks);
+        //first audio track only
+        const audioTrack: MediaStreamTrack = audioTracks[0];
         const pubOptions = { videoSource: null, audioSource: audioTrack };
         const { session, token } = res;
         const publisher = OT.initPublisher(
