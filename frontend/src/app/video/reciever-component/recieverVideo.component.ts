@@ -36,11 +36,11 @@ export class RecieverComponent implements OnInit {
 
   recordedChunks: any[];
 
-  recordMediaStream(stream: MediaStream) {
+  recordMediaStream(stream: MediaStream): void {
     log(stream);
-    const options: MediaRecorderOptions = {
-      mimeType: 'video/webm; codecs=vp9',
-    };
+    // const options: MediaRecorderOptions = {
+    //   mimeType: 'video/webm; codecs=vp9',
+    // };
     // const mediaRecorder = new MediaRecorder(stream, options);
     // const recordedChunks = [];
     // this.recorders.push({ mediaRecorder, recordedChunks });
@@ -56,9 +56,7 @@ export class RecieverComponent implements OnInit {
     // };
   }
 
-  ngOnInit(): void {}
-
-  ngAfterViewInit() {
+  ngOnInit(): void {
     this.vonageVideoAPI
       .recieverInitializeSession(this.recordMediaStream, 'subscriber')
       .subscribe(log);

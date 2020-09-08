@@ -54,20 +54,22 @@ export class SyncComponent implements OnInit {
     // connect sourcenode with script node
     sourceNode.connect(scriptNode);
 
-    //test
-    var oscillator = context.createOscillator();
-    oscillator.type = 'square';
-    oscillator.frequency.setValueAtTime(440, context.currentTime); // value in hertz
+    // test
+    // var oscillator = context.createOscillator();
+    // oscillator.type = 'square';
+    // oscillator.frequency.setValueAtTime(440, context.currentTime); // value in hertz
 
     const mediaStreamNode = context.createMediaStreamDestination();
     // connect turn script node to stream node with script node
-    // scriptNode.connect(mediaStreamNode);
+    scriptNode.connect(mediaStreamNode);
 
-    //test
-    oscillator.connect(mediaStreamNode);
-    oscillator.start();
+    // test
+    // oscillator.connect(mediaStreamNode);
+    // oscillator.start();
 
+    //play in this window
     // scriptNode.connect(context.destination);
+
     // now mediaStreamNode.stream is an mediastream
     this.vonageVideoAPI.sendAudio(mediaStreamNode.stream).subscribe(log, err);
   }
