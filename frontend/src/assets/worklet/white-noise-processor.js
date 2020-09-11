@@ -1,5 +1,8 @@
 // white-noise-processor.js
 class WhiteNoiseProcessor extends AudioWorkletProcessor {
+  // https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor/process
   process(inputs, outputs, parameters) {
     const output = outputs[0];
     output.forEach((channel) => {
