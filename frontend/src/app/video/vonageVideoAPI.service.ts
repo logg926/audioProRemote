@@ -80,6 +80,7 @@ export class VonageVideoAPI {
       })
     );
   }
+  //TODO: process video received.
   recieverInitializeSession(
     todoWithStream: (stream: MediaStream) => void,
     divIDToBeReplace: string = 'subscriber'
