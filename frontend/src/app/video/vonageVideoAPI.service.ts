@@ -111,10 +111,8 @@ export class VonageVideoAPI {
            subscriber.on('videoElementCreated', (event) => 
            {
             log('videoElementCreated')
-            log('add videoElement ',event.element,' to ',document.getElementById('subscriber'))
-            document.getElementById('subscriber').appendChild(event.element); 
-            log('added')
-            videoElementCreated(event.element)          
+            videoElementCreated(event.element)  
+            log('videoElementCreated finished')        
              //videoParent.appendChild(event.element);
            }
            );

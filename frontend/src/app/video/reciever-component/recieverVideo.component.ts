@@ -7,6 +7,7 @@ import { Socket } from 'ngx-socket-io';
 import { SocketEvent } from '../../Constants/socket';
 import { environment } from 'src/environments/environment';
 import { err, log } from '../../Helper/Helper';
+import { ThrowStmt } from '@angular/compiler';
 
 type recorderAndChunks = {
   mediaRecorder: MediaRecorder;
@@ -60,11 +61,13 @@ export class RecieverComponent implements OnInit  { // ngAfterViewChecked(), ngA
 
   videoElementCreated = (element):void => {
     try{
-      log('videoElementCreated')
-      log('this:',this)
+      log('videoElementCreated helper')
+      log('this object:',this)
+      this.subscriber.nativeElement.appendChild(element); 
+      log('append video obj:',this.subscriber.nativeElement)
       this.videoStream = element.captureStream()
-      log('videoStream',this.videoStream)
-      log('videoElementCreated finished')
+      log('Captured videoStream',this.videoStream)
+      log('videoElementCreated helper finished')
     }
     catch(e){
       err(e)
