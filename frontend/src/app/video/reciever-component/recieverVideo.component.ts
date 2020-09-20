@@ -19,7 +19,7 @@ type recorderAndChunks = {
   templateUrl: './recieverVideo.component.html',
   styleUrls: ['./recieverVideo.component.css'],
 })
-export class RecieverComponent implements OnInit  { // ngAfterViewChecked(), ngAfterContentChecked() to capture stram after <video change>
+export class RecieverComponent implements OnInit  { 
   rtcPeerConn: webkitRTCPeerConnection;
 
   //@ViewChild('videoPlayer3') videoplayer: ElementRef;
@@ -72,9 +72,6 @@ export class RecieverComponent implements OnInit  { // ngAfterViewChecked(), ngA
     catch(e){
       err(e)
     }
-
-
-    //this.subscriber.nativeElement.value = 'test';
   }
 
   ngOnInit(): void {
@@ -90,14 +87,6 @@ export class RecieverComponent implements OnInit  { // ngAfterViewChecked(), ngA
     }
 
   }
-
-  //ngAfterViewChecked() {
-    // viewChild is set after the view has been initialized
-    //log('AfterViewInit');
-    //if (this.subscriber.nativeElement){
-
-    //}
-  //}
 }
 
 // function download(recordedChunks) {

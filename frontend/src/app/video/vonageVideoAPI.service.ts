@@ -113,7 +113,6 @@ export class VonageVideoAPI {
             log('videoElementCreated')
             videoElementCreated(event.element)  
             log('videoElementCreated finished')        
-             //videoParent.appendChild(event.element);
            }
            );
         });
