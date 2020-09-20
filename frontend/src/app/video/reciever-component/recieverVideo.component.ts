@@ -38,7 +38,6 @@ export class RecieverComponent implements OnInit  {
 
   recordedChunks: any[];
 
-  //TODO: main function for stream
   recordMediaStream(stream: MediaStream): void {
     log('stream ',stream);
     // const options: MediaRecorderOptions = {

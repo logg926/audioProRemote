@@ -80,7 +80,7 @@ export class VonageVideoAPI {
       })
     );
   }
-  //TODO: process video received.
+
   recieverInitializeSession(
     todoWithStream: (stream: MediaStream) => void,
     videoElementCreated: (element:ElementRef) => void,
