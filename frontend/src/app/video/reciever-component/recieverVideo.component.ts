@@ -1,12 +1,12 @@
 /// <reference types="@types/dom-mediacapture-record" />
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 import { VonageVideoAPI } from '../vonageVideoAPI.service';
 import { Socket } from 'ngx-socket-io';
 
 import { SocketEvent } from '../../Constants/socket';
 import { environment } from 'src/environments/environment';
-import { log } from '../../Helper/Helper';
+import { err, log } from '../../Helper/Helper';
 
 type recorderAndChunks = {
   mediaRecorder: MediaRecorder;
@@ -18,12 +18,15 @@ type recorderAndChunks = {
   templateUrl: './recieverVideo.component.html',
   styleUrls: ['./recieverVideo.component.css'],
 })
-export class RecieverComponent implements OnInit {
+export class RecieverComponent implements OnInit  { // ngAfterViewChecked(), ngAfterContentChecked() to capture stram after <video change>
   rtcPeerConn: webkitRTCPeerConnection;
 
-  @ViewChild('videoPlayer3') videoplayer: ElementRef;
+  //@ViewChild('videoPlayer3') videoplayer: ElementRef;
+
+  @ViewChild('subscriber') subscriber: ElementRef;
 
   videoStream: MediaStream;
+
   constructor(
     private vonageVideoAPI: VonageVideoAPI // private socket: Socket
   ) {
@@ -32,13 +35,11 @@ export class RecieverComponent implements OnInit {
   }
   recorders: recorderAndChunks[];
 
-  // @ViewChild('subscriber') subscriber: ElementRef;
-
   recordedChunks: any[];
 
   //TODO: main function for stream
   recordMediaStream(stream: MediaStream): void {
-    log(stream);
+    log('stream ',stream);
     // const options: MediaRecorderOptions = {
     //   mimeType: 'video/webm; codecs=vp9',
     // };
@@ -57,11 +58,43 @@ export class RecieverComponent implements OnInit {
     // };
   }
 
-  ngOnInit(): void {
-    this.vonageVideoAPI
-      .recieverInitializeSession(this.recordMediaStream, 'subscriber')
-      .subscribe(log);
+  videoElementCreated = (element):void => {
+    try{
+      log('videoElementCreated')
+      log('this:',this)
+      this.videoStream = element.captureStream()
+      log('videoStream',this.videoStream)
+      log('videoElementCreated finished')
+    }
+    catch(e){
+      err(e)
+    }
+
+
+    //this.subscriber.nativeElement.value = 'test';
   }
+
+  ngOnInit(): void {
+    try{
+    log('ngOnInit')
+    this.vonageVideoAPI
+    .recieverInitializeSession(this.recordMediaStream, this.videoElementCreated, 'subscriber')
+    .subscribe(log); 
+    log('ngOnInit finished')
+    }
+    catch(e){
+      err(e)
+    }
+
+  }
+
+  //ngAfterViewChecked() {
+    // viewChild is set after the view has been initialized
+    //log('AfterViewInit');
+    //if (this.subscriber.nativeElement){
+
+    //}
+  //}
 }
 
 // function download(recordedChunks) {
