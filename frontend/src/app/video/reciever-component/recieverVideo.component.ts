@@ -1,12 +1,13 @@
 /// <reference types="@types/dom-mediacapture-record" />
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 import { VonageVideoAPI } from '../vonageVideoAPI.service';
 import { Socket } from 'ngx-socket-io';
 
 import { SocketEvent } from '../../Constants/socket';
 import { environment } from 'src/environments/environment';
-import { log } from '../../Helper/Helper';
+import { err, log } from '../../Helper/Helper';
+import { ThrowStmt } from '@angular/compiler';
 
 type recorderAndChunks = {
   mediaRecorder: MediaRecorder;
@@ -18,12 +19,15 @@ type recorderAndChunks = {
   templateUrl: './recieverVideo.component.html',
   styleUrls: ['./recieverVideo.component.css'],
 })
-export class RecieverComponent implements OnInit {
+export class RecieverComponent implements OnInit  { 
   rtcPeerConn: webkitRTCPeerConnection;
 
-  @ViewChild('videoPlayer3') videoplayer: ElementRef;
+  //@ViewChild('videoPlayer3') videoplayer: ElementRef;
+
+  @ViewChild('subscriber') subscriber: ElementRef;
 
   videoStream: MediaStream;
+
   constructor(
     private vonageVideoAPI: VonageVideoAPI // private socket: Socket
   ) {
@@ -32,12 +36,10 @@ export class RecieverComponent implements OnInit {
   }
   recorders: recorderAndChunks[];
 
-  // @ViewChild('subscriber') subscriber: ElementRef;
-
   recordedChunks: any[];
 
   recordMediaStream(stream: MediaStream): void {
-    log(stream);
+    log('stream ',stream);
     // const options: MediaRecorderOptions = {
     //   mimeType: 'video/webm; codecs=vp9',
     // };
@@ -56,10 +58,33 @@ export class RecieverComponent implements OnInit {
     // };
   }
 
+  videoElementCreated = (element):void => {
+    try{
+      log('videoElementCreated helper')
+      log('this object:',this)
+      this.subscriber.nativeElement.appendChild(element); 
+      log('append video obj:',this.subscriber.nativeElement)
+      this.videoStream = element.captureStream()
+      log('Captured videoStream',this.videoStream)
+      log('videoElementCreated helper finished')
+    }
+    catch(e){
+      err(e)
+    }
+  }
+
   ngOnInit(): void {
+    try{
+    log('ngOnInit')
     this.vonageVideoAPI
-      .recieverInitializeSession(this.recordMediaStream, 'subscriber')
-      .subscribe(log);
+    .recieverInitializeSession(this.recordMediaStream, this.videoElementCreated, 'subscriber')
+    .subscribe(log); 
+    log('ngOnInit finished')
+    }
+    catch(e){
+      err(e)
+    }
+
   }
 }
 

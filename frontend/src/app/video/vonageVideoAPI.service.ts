@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { ElementRef, Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
 
-import { map } from 'rxjs/operators';
+import { elementAt, map } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { log } from '../Helper/Helper';
 import * as OT from '@opentok/client';
@@ -80,8 +80,10 @@ export class VonageVideoAPI {
       })
     );
   }
+
   recieverInitializeSession(
     todoWithStream: (stream: MediaStream) => void,
+    videoElementCreated: (element:ElementRef) => void,
     divIDToBeReplace: string = 'subscriber'
   ): Observable<void> {
     return this.initOTSession().pipe(
@@ -99,18 +101,20 @@ export class VonageVideoAPI {
           todoWithStream(event.stream);
           const subscriber = session.subscribe(
             event.stream,
-            divIDToBeReplace,
             {
-              insertDefaultUI: true,
-              insertMode: 'replace',
+              insertDefaultUI: false,
               width: '100%',
               height: '100%',
             },
             handleError
           );
-          // subscriber.on('videoElementCreated', (event) => {
-          //   videoParent.appendChild(event.element);
-          // });
+           subscriber.on('videoElementCreated', (event) => 
+           {
+            log('videoElementCreated')
+            videoElementCreated(event.element)  
+            log('videoElementCreated finished')        
+           }
+           );
         });
       })
     );
