@@ -14,12 +14,12 @@ export class AudioProcessingService {
     const audioContext = Howler.ctx;
     const source = audioContext.createMediaStreamSource(stream);
     audioContext.audioWorklet
-      .addModule('assets/worklet/white-noise-processor.js')
+      .addModule('assets/worklet/incoming-processor.js')
       .then(
         () => {
           const whiteNoiseNode = new AudioWorkletNode(
             audioContext,
-            'white-noise-processor'
+            'incoming-processor'
           );
           source.connect(whiteNoiseNode);
           // send to speaker
