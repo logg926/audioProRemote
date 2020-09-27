@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Howl, Howler } from 'howler';
+import { err, log } from 'src/app/Helper/Helper';
 
 @Component({
   selector: 'app-play',
@@ -15,29 +16,32 @@ export class PlayComponent implements OnInit {
     });
 
     const audioContext = Howler.ctx;
-    audioContext.audioWorklet
-      .addModule('assets/worklet/white-noise-processor.js')
-      .then(
-        () => {
-          const whiteNoiseNode = new AudioWorkletNode(
-            audioContext,
-            'white-noise-processor'
-          );
+    const synthDelay = audioContext.createDelay(7.0);
 
-          // send to speaker
+    log(audioContext.currentTime)
 
-          Howler.masterGain.connect(whiteNoiseNode);
-          whiteNoiseNode.connect(audioContext.destination);
-        },
-        (err) => {
-          console.error(err);
-        }
-      );
+    Howler.masterGain.disconnect()
+    synthDelay.disconnect()
+    Howler.masterGain.connect(synthDelay);
+    log('synthDelay connect')
+    synthDelay.connect(audioContext.destination);
+    log('destination connect')
 
-    this.mediaRecorder(audioContext, sound.play, sound.stop);
+
+  
+    setTimeout(() => {
+      sound.play();
+      setTimeout(() => {
+        sound.stop();
+      }, 5000);
+    }, 5000);
+
+
+
   }
-
-  mediaRecorder(audioContext, playfn, stopfn) {
+/*
+  mediaRecorder(audioContext,sound) {
+    try{
     Howler.mute(false);
 
     const mediaDest: MediaStreamAudioDestinationNode = audioContext.createMediaStreamDestination();
@@ -67,12 +71,21 @@ export class PlayComponent implements OnInit {
       // audioPlayer.play()
     };
 
-    playfn();
+    sound.play();
+    log('play func')
     mediaRecorder.start();
+    log('play and start rec')
 
     setTimeout(() => {
       mediaRecorder.stop();
-      stopfn();
-    }, 5000);
+      sound.stop();
+    }, 1000);
+
+    log('timeout set')
   }
+  catch(e){
+    err(e)
+  }
+  }
+  */
 }
