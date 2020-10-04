@@ -3,7 +3,7 @@ import { Routes, RouterModule } from "@angular/router";
 import { PageNotFoundComponent } from "./shared/components";
 
 import { LoginRoutingModule } from "./login/login-routing.module";
-import { MenuRoutingModule } from "./detail/menu-routing.module";
+import { MenuRoutingModule } from "./menu/menu-routing.module";
 
 const routes: Routes = [
   {

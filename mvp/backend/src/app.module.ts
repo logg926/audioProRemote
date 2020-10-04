@@ -15,6 +15,7 @@ import { AuthzModule } from './authz/authz.module';
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       // debug: false,
+      context: ({ req }) => ({ req }),
       // playground: false,
     }),
     UsersModule,
