@@ -24,6 +24,8 @@ function createWindow(): BrowserWindow {
     },
   });
 
+  win.setMenuBarVisibility(false);
+
   if (serve) {
     win.webContents.openDevTools();
 
