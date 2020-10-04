@@ -1,18 +1,4 @@
 <div class="container">
-  <h1 class="title">
-    Sign In
-    <!-- {{ "PAGES.HOME.TITLE" | translate }} -->
-  </h1>
-
-  <!-- <a routerLink="/detail">{{ "PAGES.HOME.GO_TO_DETAIL" | translate }}</a> -->
-  <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
-    <button (click)="auth.logout({ returnTo: document.location.origin })">
-      Log out
-    </button>
-  </ng-container>
-
-  <ng-template #loggedOut>
-    <button (click)="auth.loginWithRedirect()">Log in</button>
-  </ng-template>
-  <!-- //add google login here -->
+  <h1 class="title">Sign In</h1>
+  <button (click)="auth.loginWithRedirect()">Log in</button>
 </div>

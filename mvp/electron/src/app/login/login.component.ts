@@ -15,5 +15,13 @@ export class AuthButtonComponent implements OnInit {
     public auth: AuthService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.auth.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.router.navigate(["/menu"]);
+      } else {
+        // finish loading
+      }
+    });
+  }
 }

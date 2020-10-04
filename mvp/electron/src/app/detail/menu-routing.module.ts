@@ -1,12 +1,12 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Routes, RouterModule } from "@angular/router";
-import { AuthButtonComponent } from "./login.component";
+import { MenuComponent } from "./menu.component";
 
 const routes: Routes = [
   {
-    path: "login",
-    component: AuthButtonComponent,
+    path: "menu",
+    component: MenuComponent,
   },
 ];
 
@@ -15,4 +15,4 @@ const routes: Routes = [
   imports: [CommonModule, RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class LoginRoutingModule {}
+export class MenuRoutingModule {}

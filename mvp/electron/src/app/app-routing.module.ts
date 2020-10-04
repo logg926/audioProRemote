@@ -3,12 +3,12 @@ import { Routes, RouterModule } from "@angular/router";
 import { PageNotFoundComponent } from "./shared/components";
 
 import { LoginRoutingModule } from "./login/login-routing.module";
-import { DetailRoutingModule } from "./detail/detail-routing.module";
+import { MenuRoutingModule } from "./detail/menu-routing.module";
 
 const routes: Routes = [
   {
     path: "",
-    redirectTo: "home",
+    redirectTo: "login",
     pathMatch: "full",
   },
   {
@@ -21,7 +21,7 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes),
     LoginRoutingModule,
-    DetailRoutingModule,
+    MenuRoutingModule,
   ],
   exports: [RouterModule],
 })
