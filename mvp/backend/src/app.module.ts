@@ -8,6 +8,8 @@ import { UsersModule } from './users/users.module';
 
 import { ConfigModule } from '@nestjs/config';
 import { AuthzModule } from './authz/authz.module';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { User } from './users/user.model';
 
 @Module({
   imports: [
@@ -20,6 +22,19 @@ import { AuthzModule } from './authz/authz.module';
     }),
     UsersModule,
     AuthzModule,
+
+    SequelizeModule.forRoot({
+      dialect: 'postgres',
+      host: process.env.DB_HOST_ADDRESS,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USER_NAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      models: [User],
+
+      // autoLoadModels: true,
+      // synchronize: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

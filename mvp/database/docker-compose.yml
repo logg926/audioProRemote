@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  sales_db:
+    image: postgres:11
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./docker-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: qwertyuiop
+      POSTGRES_DB: defaultdb
