@@ -1,7 +1,25 @@
-import { Column, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  Default,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { Session } from './session.model';
+import { UserObject } from '../../../shared/UserObject';
 
 @Table
-export class User extends Model<User> {
+export class User extends Model<User> implements UserObject {
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
+  id: string;
+
   @Column
-  email: string;
+  sub: string;
+
+  @HasMany(() => Session)
+  players: Session[];
 }

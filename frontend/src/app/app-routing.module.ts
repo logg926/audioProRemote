@@ -7,7 +7,8 @@ import { SyncComponent } from './sync/sync.component';
 import { SyncRecieveComponent } from './sync-recieve/sync-recieve.component';
 import { PlayComponent } from './controlplay/play/play.component';
 import { ControlComponent } from './controlplay/control/control.component';
-
+import { LooperclientComponent } from './looper/looperclient-component/looperclient.component';
+import { LooperhostComponent } from './looper/looperhost-component/looperhost.component';
 const routes: Routes = [
   { path: 'sender', component: SenderComponent },
   { path: 'reciever', component: RecieverComponent },
@@ -15,6 +16,8 @@ const routes: Routes = [
   { path: 'sync-recieve', component: SyncRecieveComponent },
   { path: 'play', component: PlayComponent },
   { path: 'control', component: ControlComponent },
+  { path: 'looperhost', component: LooperhostComponent },
+  { path: 'looperclient', component: LooperclientComponent },
 ];
 
 @NgModule({
