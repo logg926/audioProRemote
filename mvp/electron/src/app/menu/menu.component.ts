@@ -31,5 +31,18 @@ export class MenuComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void {}
+  private getUser() {
+    return this.apollo.watchQuery({
+      query: gql`
+        {
+          user
+        }
+      `,
+    }).valueChanges;
+  }
+  ngOnInit(): void {
+    this.getUser().subscribe((result) => {
+      console.log(result);
+    });
+  }
 }

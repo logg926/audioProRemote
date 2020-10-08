@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthzModule } from './authz/authz.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from './users/user.model';
+import { Session } from './users/session.model';
 
 @Module({
   imports: [
@@ -30,10 +31,10 @@ import { User } from './users/user.model';
       username: process.env.DB_USER_NAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      models: [User],
+      models: [User, Session],
 
       // autoLoadModels: true,
-      // synchronize: true,
+      synchronize: true,
     }),
   ],
   controllers: [AppController],
