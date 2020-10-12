@@ -83,7 +83,7 @@ export class VonageVideoAPI {
 
   recieverInitializeSession(
     todoWithStream: (stream: MediaStream) => void,
-    videoElementCreated: (element:ElementRef) => void,
+    videoElementCreated: (element: ElementRef) => void,
     divIDToBeReplace: string = 'subscriber'
   ): Observable<void> {
     return this.initOTSession().pipe(
@@ -108,13 +108,11 @@ export class VonageVideoAPI {
             },
             handleError
           );
-           subscriber.on('videoElementCreated', (event) => 
-           {
-            log('videoElementCreated')
-            videoElementCreated(event.element)  
-            log('videoElementCreated finished')        
-           }
-           );
+          subscriber.on('videoElementCreated', (event) => {
+            log('videoElementCreated');
+            videoElementCreated(event.element);
+            log('videoElementCreated finished');
+          });
         });
       })
     );
@@ -147,6 +145,106 @@ export class VonageVideoAPI {
           } else {
             session.publish(publisher, handleError);
           }
+        });
+      })
+    );
+  }
+  hostInitializeSession(
+    videoElementCreated: (element: ElementRef) => void,
+    divIDToBeReplace: string = 'subscriber',
+    stream: MediaStream
+  ): Observable<void> {
+    return this.initOTSession().pipe(
+      map((res) => {
+        const audioTracks = stream.getAudioTracks();
+        // log('aud');
+        // log(audioTracks);
+        //first audio track only
+        const audioTrack: MediaStreamTrack = audioTracks[0];
+        const pubOptions = { videoSource: null, audioSource: audioTrack };
+
+        const { session, token } = res;
+        const publisher = OT.initPublisher(
+          divIDToBeReplace,
+          pubOptions,
+          handleError
+        );
+        session.connect(token, (error) => {
+          // If the connection is successful, publish to the session
+          if (error) {
+            handleError(error);
+          } else {
+            session.publish(publisher, handleError);
+          }
+        });
+        session.on('streamCreated', (event) => {
+          const subscriber = session.subscribe(
+            event.stream,
+            {
+              insertDefaultUI: false,
+              width: '100%',
+              height: '100%',
+            },
+            handleError
+          );
+          subscriber.on('videoElementCreated', (event) => {
+            log('videoElementCreated');
+            videoElementCreated(event.element);
+            log('videoElementCreated finished');
+          });
+        });
+      })
+    );
+  }
+
+  clientInitializeSession(
+    mediaStreamTrack: MediaStreamTrack,
+    divIDToBeReplace: string = 'publisher',
+    videoElementCreated: (element: ElementRef) => void
+  ): Observable<void> {
+    return this.initOTSession().pipe(
+      map((res) => {
+        const audioTracks = mediaStreamTrack;
+        // log('aud');
+        // log(audioTracks);
+        //first audio track only
+        const audioTrack: MediaStreamTrack = audioTracks[0];
+        const pubOptions = { videoSource: null, audioSource: audioTrack };
+        const { session, token } = res;
+        const publisher = OT.initPublisher(
+          divIDToBeReplace,
+          pubOptions,
+          handleError
+        );
+
+        return { publisher, session, token };
+      }),
+      map(({ publisher, session, token }) => {
+        session.connect(token, (error) => {
+          // If the connection is successful, publish to the session
+          if (error) {
+            handleError(error);
+          } else {
+            session.publish(publisher, handleError);
+          }
+        });
+
+        session.on('streamCreated', (event) => {
+          // todoWithStream(event.stream);
+          const subscriber = session.subscribe(
+            event.stream,
+            {
+              insertDefaultUI: false,
+              width: '100%',
+              height: '100%',
+            },
+            handleError
+          );
+          subscriber.on('videoElementCreated', (event) => {
+            log('videoElementCreated');
+            videoElementCreated(event.element);
+            log('videoElementCreated finished');
+          });
         });
       })
     );

@@ -2,7 +2,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { err, log } from '../../Helper/Helper';
 import { VonageVideoAPI } from '../../video/vonageVideoAPI.service';
-
+import { LooperHostService } from './looper-host.service';
 type recorderAndChunks = {
   mediaRecorder: MediaRecorder;
   recordedChunks: any[];
@@ -22,7 +22,10 @@ export class LooperhostComponent implements OnInit {
 
   videoStream: MediaStream;
 
-  constructor(private vonageVideoAPI: VonageVideoAPI) {
+  constructor(
+    private vonageVideoAPI: VonageVideoAPI,
+    private looperHostService: LooperHostService
+  ) {
     this.recorders = [];
     this.recordedChunks = [];
   }
@@ -32,70 +35,35 @@ export class LooperhostComponent implements OnInit {
 
   recordMediaStream(stream: MediaStream): void {
     log('stream ', stream);
-    // const options: MediaRecorderOptions = {
-    //   mimeType: 'video/webm; codecs=vp9',
-    // };
-    // const mediaRecorder = new MediaRecorder(stream, options);
-    // const recordedChunks = [];
-    // this.recorders.push({ mediaRecorder, recordedChunks });
-    // mediaRecorder.ondataavailable = (evt) => {
-    //   console.log('data-available');
-    //   if (evt.data.size > 0) {
-    //     recordedChunks.push(evt.data);
-    //     console.log(recordedChunks);
-    //     download(recordedChunks);
-    //   } else {
-    //     console.log('no data avaliable');
-    //   }
-    // };
   }
 
   videoElementCreated = (element): void => {
     try {
-      // log('videoElementCreated helper');
-      // log('this object:', this);
       this.subscriber.nativeElement.appendChild(element);
-      // log('append video obj:', this.subscriber.nativeElement);
       this.videoStream = element.captureStream();
-      // log('Captured videoStream', this.videoStream);
-      // log('videoElementCreated helper finished');
-
-      // to audioWorklet
-      // this.audioProcessingService.putInIncomingProcessingWorklet(
-      //   this.videoStream
-      // );
+      console.log(this.videoStream);
+      this.looperHostService.gotRemoteStream(this.videoStream);
     } catch (e) {
       err(e);
     }
   };
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    const stream = await this.looperHostService.startServer();
+    // signalingChannel = new WebSocket('ws://127.0.0.1');
+    // signalingChannel.onmessage = receiveMessage;
+    // signalingChannel.onopen = () =>
+    //   (document.getElementById('startServerButton').disabled = false);
     try {
       log('ngOnInit');
       this.vonageVideoAPI
-        .recieverInitializeSession(
-          this.recordMediaStream,
-          this.videoElementCreated,
-          'subscriber'
-        )
-        .subscribe(log);
+        .hostInitializeSession(this.videoElementCreated, 'subscriber', stream)
+        .subscribe(() => {});
       log('ngOnInit finished');
     } catch (e) {
       err(e);
     }
+
+    // this.connection[clientId].ontrack = this.looperHostService.gotRemoteStream;
   }
 }
-
-// function download(recordedChunks) {
-//   var blob = new Blob(recordedChunks, {
-//     type: 'video/webm',
-//   });
-//   var url = URL.createObjectURL(blob);
-//   var a = document.createElement('a');
-//   document.body.appendChild(a);
-//   // a.style = "display: none";
-//   a.href = url;
-//   a.download = 'test.webm';
-//   a.click();
-//   window.URL.revokeObjectURL(url);
-// }
