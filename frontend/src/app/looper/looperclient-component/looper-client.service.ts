@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Metronome } from '../looperhost-component/looper-host.service';
-
+import { Correlator } from './correlator';
 @Injectable({
   providedIn: 'root',
 })
@@ -103,7 +103,7 @@ SERVER                      V                  |
 
     // Create Web Audio
     this.audioContext = new AudioContext({ sampleRate: this.sampleRate });
-
+    // this.audioContext.sampleRate = this.sampleRate;
     this.clickBuffer = await this.loadAudioBuffer('assets/snd/Closed_Hat.wav');
 
     userInputNode = new MediaStreamAudioSourceNode(this.audioContext, {
@@ -212,6 +212,7 @@ SERVER                      V                  |
       channelSplitterNode,
       this.clickBuffer,
       this.updateDelayNode,
+      this.sampleRate,
       1
     );
 
@@ -263,122 +264,6 @@ SERVER                      V                  |
     this.recorder.stop();
     this.connection.close();
   }
-}
-let clickBufferDuration, sampleRate, callBackFunction;
-
-class Correlator {
-  constructor(
-    audioContext,
-    inputNode,
-    clickBuffer,
-    callBack,
-    inputNodeOutput = 0
-  ) {
-    console.log('Creating convolver node.');
-    clickBufferDuration = clickBuffer.duration;
-    sampleRate = audioContext.sampleRate;
-    const reverseBuffer = revertBuffer(audioContext, clickBuffer);
-    const convolverNode = new ConvolverNode(audioContext, {
-      buffer: reverseBuffer,
-    });
-    callBackFunction = callBack;
-    inputNode.connect(convolverNode, inputNodeOutput);
-
-    console.log('Creating script processor.');
-    const scriptProcessor = audioContext.createScriptProcessor(16384, 1, 1);
-    scriptProcessor.onaudioprocess = processAudio;
-    convolverNode.connect(scriptProcessor);
-    scriptProcessor.connect(audioContext.destination);
-    // Need to connect script processor to destination, otherwise
-    // onaudioprocess would not be fired in Chrome.  See
-    // https://stackoverflow.com/q/27324608
-  }
-}
-function revertBuffer(audioContext, buffer) {
-  var i;
-
-  const reverseBuffer = audioContext.createBuffer(
-    buffer.numberOfChannels,
-    buffer.length,
-    buffer.sampleRate
-  );
-
-  const array = new Float32Array(buffer.length);
-
-  for (i = 0; i < buffer.numberOfChannels; i++) {
-    buffer.copyFromChannel(array, i, 0);
-    array.reverse();
-    reverseBuffer.copyToChannel(array, i, 0);
-  }
-
-  return reverseBuffer;
-}
-
-function processAudio(event) {
-  var array, i, networkLatency, bufferSize, bufferDuration;
-  var startSecond, endSecond, boundarySample, currentPlaybackTime;
-  var playbackTimeAdjustment;
-
-  array = event.inputBuffer.getChannelData(0);
-  bufferSize = event.inputBuffer.length;
-  bufferDuration = event.inputBuffer.duration;
-  startSecond = Math.floor(event.playbackTime);
-  endSecond = Math.floor(event.playbackTime + bufferDuration);
-
-  if (!this.max) this.max = this.argmax = -1;
-
-  // Dirty trick
-  currentPlaybackTime =
-    Math.round(event.playbackTime * this.sampleRate) % 16384;
-  if (!this.initialPlaybackTime) this.initialPlaybackTime = currentPlaybackTime;
-  playbackTimeAdjustment =
-    (currentPlaybackTime - this.initialPlaybackTime) % 16384;
-
-  if (startSecond == endSecond) {
-    // Buffer contained within one second
-    for (i = 0; i < bufferSize; i++)
-      if (array[i] > this.max) {
-        this.argmax = frac(event.playbackTime + i / this.sampleRate);
-        this.max = array[i];
-      }
-  } // Buffer spans two seconds
-  else {
-    // Process part of buffer in start second
-    boundarySample = Math.round(
-      (endSecond - event.playbackTime) * this.sampleRate
-    );
-
-    for (i = 0; i < boundarySample; i++)
-      if (array[i] > this.max) {
-        this.argmax = frac(event.playbackTime + i / this.sampleRate);
-        this.max = array[i];
-      }
-
-    // Perform calculation
-    networkLatency = frac(
-      this.argmax -
-        this.clickBufferDuration -
-        bufferDuration -
-        (playbackTimeAdjustment - 1) / this.sampleRate
-    );
-    if (networkLatency > 16384 / this.sampleRate)
-      networkLatency -= 16384 / this.sampleRate;
-
-    console.log(networkLatency);
-    this.callBackFunction(networkLatency);
-
-    // Process part of buffer in end second
-    this.max = this.argmax = -1;
-    for (i = boundarySample; i < bufferSize; i++)
-      if (array[i] > this.max) {
-        this.argmax = frac(event.playbackTime + i / this.sampleRate);
-        this.max = array[i];
-      }
-  }
-}
-
-function frac(x) {
-  return x - Math.floor(x);
 }
 
 // class Recorder

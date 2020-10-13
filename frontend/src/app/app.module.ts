@@ -9,9 +9,17 @@ import { SyncComponent } from './sync/sync.component';
 import { SyncRecieveComponent } from './sync-recieve/sync-recieve.component';
 import { PlayComponent } from './controlplay/play/play.component';
 import { ControlComponent } from './controlplay/control/control.component';
+import { LatencyDetectorComponent } from './latency-detector/latency-detector.component';
 
 @NgModule({
-  declarations: [AppComponent, SyncComponent, SyncRecieveComponent, PlayComponent, ControlComponent],
+  declarations: [
+    AppComponent,
+    SyncComponent,
+    SyncRecieveComponent,
+    PlayComponent,
+    ControlComponent,
+    LatencyDetectorComponent,
+  ],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [],
   bootstrap: [AppComponent],

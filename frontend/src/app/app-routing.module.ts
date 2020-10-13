@@ -9,6 +9,7 @@ import { PlayComponent } from './controlplay/play/play.component';
 import { ControlComponent } from './controlplay/control/control.component';
 import { LooperclientComponent } from './looper/looperclient-component/looperclient.component';
 import { LooperhostComponent } from './looper/looperhost-component/looperhost.component';
+import { LatencyDetectorComponent } from './latency-detector/latency-detector.component';
 const routes: Routes = [
   { path: 'sender', component: SenderComponent },
   { path: 'reciever', component: RecieverComponent },
@@ -18,6 +19,7 @@ const routes: Routes = [
   { path: 'control', component: ControlComponent },
   { path: 'looperhost', component: LooperhostComponent },
   { path: 'looperclient', component: LooperclientComponent },
+  { path: 'latencydetector', component: LatencyDetectorComponent },
 ];
 
 @NgModule({
